@@ -1,0 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap');
+
+.title-screen {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.title-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: brightness(0.65);
+  transform: scale(1.05);
+}
+
+.title-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(6, 8, 15, 0.3) 0%,
+    rgba(6, 8, 15, 0.5) 40%,
+    rgba(6, 8, 15, 0.85) 100%
+  );
+}
+
+.title-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 40px 20px;
+  max-width: 600px;
+}
+
+.title-eyebrow {
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.4em;
+  color: #b8902a;
+  text-transform: uppercase;
+  text-shadow: 0 0 20px rgba(0,0,0,0.9);
+}
+
+.title-name {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 700;
+  color: #c8a030;
+  letter-spacing: 0.1em;
+  line-height: 1.1;
+  text-shadow: 0 0 40px rgba(200, 160, 48, 0.3);
+}
+
+.title-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 200px;
+}
+
+.title-dash {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #3a2a10, transparent);
+}
+
+.title-gem {
+  width: 7px;
+  height: 7px;
+  background: #c8a030;
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+
+.title-tagline {
+  font-family: 'Crimson Pro', serif;
+  font-size: 1.1rem;
+  color: #a08040;
+  font-style: italic;
+  line-height: 1.8;
+  max-width: 360px;
+  text-shadow: 0 0 20px rgba(0,0,0,0.9);
+}
+
+.title-btn {
+  font-family: 'Cinzel', serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  color: #c8a030;
+  border: 1px solid #3a2a10;
+  border-radius: 6px;
+  padding: 12px 40px;
+  background: rgba(6, 8, 15, 0.6);
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  margin-top: 8px;
+}
+
+.title-btn:hover {
+  border-color: #c8a030;
+  background: rgba(200, 160, 48, 0.08);
+  box-shadow: 0 0 20px rgba(200, 160, 48, 0.15);
+}
+
+/* Placeholder CharSelectScreen to prevent crash */
