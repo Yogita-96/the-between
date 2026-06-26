@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import kaenImg from '../assets/kaen.png'
 import kaenProfile1 from '../assets/kaen-sideprofile.png'
 import kaenAction from '../assets/kaen-action.png'
@@ -7,6 +7,7 @@ import sableProfile from '../assets/sable-sideprofile.png'
 import sableAction from '../assets/sable-action.png'
 import betweenBg from '../assets/the-between-bg.png'
 import './CharSelectScreen.css'
+
 
 const CHARACTERS = [
   {
@@ -54,17 +55,24 @@ function StatBar({ value, max, color }) {
 
 function CharPortrait({ char, isActive }) {
   const [imgIndex, setImgIndex] = useState(0)
+  const prevActiveRef = useRef(isActive)
 
   useEffect(() => {
-    if (!isActive) {
+    if (!isActive && prevActiveRef.current) {
       setImgIndex(0)
-      return
     }
+    prevActiveRef.current = isActive
+  }, [isActive])
+
+  useEffect(() => {
+    if (!isActive) return
     const timer = setInterval(() => {
       setImgIndex(i => (i + 1) % char.images.length)
     }, 2500)
     return () => clearInterval(timer)
   }, [isActive, char.images.length])
+
+
 
   return (
     <div className="char-portrait-wrap">
