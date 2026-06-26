@@ -313,6 +313,9 @@
     grid-template-columns: 1fr;
   }
   .char-portrait-wrap {
-    height: 240px;
+    height: 360px;
+  }
+  .char-portrait-img {
+    object-position: top center;
   }
 }
