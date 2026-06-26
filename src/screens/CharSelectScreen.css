@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap');
+
 .charselect {
   position: relative;
   min-height: 100vh;
@@ -11,13 +13,17 @@
 .charselect-bg {
   position: absolute;
   inset: 0;
-  background: #06080f;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: brightness(0.5);
+  transform: scale(1.05);
 }
 
 .charselect-overlay {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 50% 0%, #1a1205 0%, #06080f 60%);
+  background: radial-gradient(ellipse at 50% 0%, rgba(26,18,5,0.6) 0%, rgba(6,8,15,0.75) 60%);
 }
 
 .charselect-content {
@@ -78,7 +84,7 @@
 }
 
 .char-card {
-  background: rgba(8, 9, 15, 0.8);
+  background: rgba(8, 9, 15, 0.4);
   border: 1px solid #2a2010;
   border-radius: 12px;
   overflow: hidden;
@@ -111,6 +117,12 @@
   transition: transform 0.4s ease;
 }
 
+.char-portrait-img.full-body {
+  object-fit: contain;
+  object-position: center center;
+  background: transparent;
+}
+
 .char-card:hover .char-portrait-img {
   transform: scale(1.03);
 }
@@ -124,12 +136,35 @@
   background: linear-gradient(to bottom, transparent, rgba(8, 9, 15, 0.95));
 }
 
+.char-img-dots {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 3;
+}
+
+.char-img-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #3a2a10;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.char-img-dot.active {
+  background: #c8a030;
+}
+
 .char-info {
   padding: 16px 20px 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  background: linear-gradient(to bottom, rgba(8,9,15,0.8), rgba(15,12,5,0.95));
+  background: linear-gradient(to bottom, rgba(8,9,15,0.3), rgba(15,12,5,0.7));
 }
 
 .char-header {
