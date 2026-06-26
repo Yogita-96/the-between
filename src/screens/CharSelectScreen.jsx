@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import kaenImg from '../assets/kaen.png'
-import kaenProfile1 from '../assets/kaen_sideprofile_1.png'
-import kaenAction from '../assets/kaen-actioncharge.png'
+import kaenProfile1 from '../assets/kaen-sideprofile.png'
+import kaenAction from '../assets/kaen-action.png'
 import sableImg from '../assets/sable.png'
 import sableProfile from '../assets/sable-sideprofile.png'
 import sableAction from '../assets/sable-action.png'
@@ -16,7 +16,7 @@ const CHARACTERS = [
     role: 'Heavy Combatant',
     lore: 'He has been here longer than memory. He does not know why. He knows only that he is still standing.',
     image: kaenImg,
-    images: [kaenImg, kaenProfile1, kaenAction, kaenImg],
+    images: [kaenImg, kaenProfile1, kaenAction],
     stats: { hp: 100, stamina: 5, agility: 2 },
     moves: [
       { name: 'Greatsword Strike', desc: '20 dmg, posture +15', cost: '3 ST' },
@@ -26,21 +26,21 @@ const CHARACTERS = [
     ],
   },
   {
-    id: 'sable',images: [kaenImg, kaenProfile1, kaenAction, kaenImg],
-    name: 'Sable',
-    title: 'The Unseen',
-    role: 'Precision Assassin',
-    lore: 'She speaks rarely. When she does, it sounds like she is reading from something written a long time ago.',
-    image: sableImg,
-    images: [sableImg, sableProfile, sableAction, sableImg],
-    stats: { hp: 65, stamina: 5, agility: 5 },
-    moves: [
-      { name: 'Twin Strike', desc: '2×8 dmg, posture +8', cost: '2 ST' },
-      { name: 'Crossbow', desc: '20 dmg, ignores guard', cost: '2 ST' },
-      { name: 'Shadow Step', desc: 'Reposition, next ×2 dmg', cost: '1 ST' },
-      { name: 'Throat Strike', desc: '25 dmg, hides Intent', cost: '3 ST' },
-    ],
-  },
+  id: 'sable',
+  name: 'Sable',
+  title: 'The Unseen',
+  role: 'Precision Assassin',
+  lore: 'She speaks rarely. When she does, it sounds like she is reading from something written a long time ago.',
+  image: sableImg,
+  images: [sableImg, sableProfile, sableAction],
+  stats: { hp: 65, stamina: 5, agility: 5 },
+  moves: [
+    { name: 'Twin Strike', desc: '2×8 dmg, posture +8', cost: '2 ST' },
+    { name: 'Crossbow', desc: '20 dmg, ignores guard', cost: '2 ST' },
+    { name: 'Shadow Step', desc: 'Reposition, next ×2 dmg', cost: '1 ST' },
+    { name: 'Throat Strike', desc: '25 dmg, hides Intent', cost: '3 ST' },
+  ],
+},
 ]
 
 function StatBar({ value, max, color }) {
@@ -72,7 +72,7 @@ function CharPortrait({ char, isActive }) {
         key={`${char.id}-${imgIndex}`}
         src={char.images[imgIndex]}
         alt={char.name}
-        className={`char-portrait-img ${isActive && imgIndex !== 0 ? 'full-body' : ''}`}
+         className="char-portrait-img"
       />
       <div className="char-portrait-fade" />
       {isActive && (
