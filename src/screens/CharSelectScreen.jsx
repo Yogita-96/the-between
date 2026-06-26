@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import kaenImg from '../assets/kaen.png'
 import kaenProfile1 from '../assets/kaen_sideprofile_1.png'
-import kaenProfile2 from '../assets/kaen-sideprofile-2.png'
 import kaenAction from '../assets/kaen-actioncharge.png'
 import sableImg from '../assets/sable.png'
 import sableProfile from '../assets/sable-sideprofile.png'
@@ -17,7 +16,7 @@ const CHARACTERS = [
     role: 'Heavy Combatant',
     lore: 'He has been here longer than memory. He does not know why. He knows only that he is still standing.',
     image: kaenImg,
-    images: [kaenImg, kaenProfile1, kaenProfile2, kaenAction],
+    images: [kaenImg, kaenProfile1, kaenAction, kaenImg],
     stats: { hp: 100, stamina: 5, agility: 2 },
     moves: [
       { name: 'Greatsword Strike', desc: '20 dmg, posture +15', cost: '3 ST' },
@@ -27,13 +26,13 @@ const CHARACTERS = [
     ],
   },
   {
-    id: 'sable',
+    id: 'sable',images: [kaenImg, kaenProfile1, kaenAction, kaenImg],
     name: 'Sable',
     title: 'The Unseen',
     role: 'Precision Assassin',
     lore: 'She speaks rarely. When she does, it sounds like she is reading from something written a long time ago.',
     image: sableImg,
-    images: [sableImg, sableProfile, sableAction],
+    images: [sableImg, sableProfile, sableAction, sableImg],
     stats: { hp: 65, stamina: 5, agility: 5 },
     moves: [
       { name: 'Twin Strike', desc: '2×8 dmg, posture +8', cost: '2 ST' },
