@@ -1,0 +1,503 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap');
+
+.combat {
+  position: relative;
+  min-height: 100vh;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  overflow: hidden;
+  font-family: 'Cinzel', serif;
+}
+
+.combat-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom,
+    rgba(6,8,15,0.55) 0%,
+    rgba(6,8,15,0.15) 25%,
+    rgba(6,8,15,0.15) 55%,
+    rgba(6,8,15,0.9) 100%);
+  z-index: 1;
+}
+
+.combat-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1100px;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* STAT BARS */
+.combat-stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.combat-stat-block {
+  width: 240px;
+}
+
+.combat-stat-block--enemy {
+  text-align: right;
+}
+
+.combat-char-name {
+  font-size: 1.25rem;
+  color: #c8a030;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+
+.combat-char-name--enemy {
+  color: #b0c0d0;
+}
+
+.combat-stagger-tag {
+  font-size: 0.5rem;
+  color: #a060c0;
+  border: 1px solid #a060c0;
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin-left: 6px;
+  letter-spacing: 0.1em;
+  vertical-align: middle;
+}
+
+.combat-bar-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: #cab080;
+  letter-spacing: 0.08em;
+  margin-bottom: 3px;
+}
+
+.combat-stat-block--enemy .combat-bar-row {
+  flex-direction: row-reverse;
+}
+
+.combat-bar {
+  height: 8px;
+  background: rgba(10,8,5,0.8);
+  border: 1px solid #3a2a10;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 8px;
+  display: flex;
+}
+
+.combat-bar--seg {
+  gap: 2px;
+  padding: 1px;
+  background: rgba(10,8,5,0.8);
+}
+
+.combat-seg {
+  flex: 1;
+  background: #1a1508;
+  border-radius: 2px;
+  transition: background 0.2s;
+}
+
+.combat-seg.filled {
+  background: #5aaa30;
+}
+
+.combat-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.combat-bar-fill--hp {
+  background: linear-gradient(to right, #8a3010, #c84030);
+}
+
+.combat-bar-fill--posture {
+  background: linear-gradient(to right, #604080, #a060c0);
+}
+
+.combat-substat-row {
+  display: flex;
+  gap: 10px;
+}
+
+.combat-substat {
+  flex: 1;
+}
+
+.combat-substat-label {
+  font-size: 0.62rem;
+  color: #b0a070;
+  letter-spacing: 0.06em;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.combat-stat-block--enemy .combat-substat-label {
+  text-align: right;
+}
+
+/* INTENT */
+.combat-intent {
+  align-self: flex-end;
+  background: rgba(12,14,20,0.92);
+  border: 1px solid #5a6a7a;
+  border-radius: 8px;
+  padding: 12px 16px;
+  max-width: 320px;
+  margin-top: 280px;
+}
+
+.combat-intent-label {
+  font-size: 0.7rem;
+  color: #b8d0e8;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.combat-intent-line {
+  font-size: 0.95rem;
+  color: #a8c0d8;
+  font-style: italic;
+  font-family: 'Crimson Pro', serif;
+  line-height: 1.5;
+}
+
+/* SIDE CONTROLS — fixed to screen margins */
+.combat-side-btn {
+  font-family: 'Cinzel', serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #c8a030;
+  background: rgba(10,10,14,0.6);
+  border: 1px solid #4a4030;
+  border-radius: 4px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 6;
+}
+
+.combat-side-btn:hover {
+  border-color: #c8a030;
+  background: rgba(200,160,48,0.1);
+}
+
+.combat-flee-corner {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  color: #e87050;
+  border-color: #c04020;
+  font-weight: 700;
+  background: rgba(40,12,8,0.7);
+}
+
+.combat-flee-corner:hover {
+  border-color: #ff6040;
+  background: rgba(200,60,40,0.2);
+  color: #ff8060;
+}
+.combat-side-controls {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 6;
+}
+
+/* COMBAT LOG — far left screen margin */
+.combat-log {
+  position: fixed;
+  left: 18px;
+  bottom: 50%;
+  transform: translateY(50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+  max-width: 240px;
+  max-height: 45vh;
+  overflow: hidden;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.combat-log-entry {
+  font-size: 0.95rem;
+  color: #d8c89a;
+  font-family: 'Crimson Pro', serif;
+  font-style: italic;
+  text-align: left;
+  line-height: 1.5;
+  text-shadow: 0 2px 8px rgba(0,0,0,1), 0 0 16px rgba(0,0,0,0.8);
+  transition: opacity 0.4s;
+}
+
+/* MOVES */
+.combat-moves-wrap {
+  margin-top: auto;
+}
+
+.combat-turn-label {
+  text-align: center;
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  color: #c8a030;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.combat-moves {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.combat-move {
+  background: rgba(14,16,22,0.85);
+  border: none;
+  border-radius: 0;
+  padding: 18px 12px;
+  cursor: pointer;
+  text-align: center;
+  position: relative;
+  outline: 1px solid #3a3020;
+  outline-offset: -5px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  transition: all 0.2s ease;
+  font-family: 'Cinzel', serif;
+}
+
+.combat-move::before,
+.combat-move::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-color: #c8a030;
+  border-style: solid;
+  border-width: 0;
+}
+
+.combat-move::before {
+  top: 3px;
+  left: 3px;
+  border-top-width: 2px;
+  border-left-width: 2px;
+}
+
+.combat-move::after {
+  bottom: 3px;
+  right: 3px;
+  border-bottom-width: 2px;
+  border-right-width: 2px;
+}
+
+.combat-move:hover:not(.disabled) {
+  background: rgba(200,160,48,0.1);
+  outline-color: #6a5a30;
+  transform: translateY(-2px);
+}
+
+.combat-move:hover:not(.disabled)::before,
+.combat-move:hover:not(.disabled)::after {
+  border-color: #ffd040;
+}
+
+.combat-move.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.combat-move-name {
+  font-size: 0.78rem;
+  color: #c8a030;
+  letter-spacing: 0.02em;
+}
+
+.combat-move-desc {
+  font-size: 0.58rem;
+  color: #9a8a60;
+  font-family: 'Crimson Pro', serif;
+}
+
+.combat-move-cost {
+  font-size: 0.58rem;
+  color: #7a9a40;
+}
+
+/* END SCREENS (victory / defeat) */
+.combat-end {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.combat-end-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.combat-end-art--defeat {
+  filter: grayscale(0.3) brightness(0.7);
+}
+
+.combat-end-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(6,8,15,0.4) 0%, rgba(6,8,15,0.92) 80%);
+}
+
+.combat-end-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 40px;
+  max-width: 520px;
+}
+
+.combat-end-eyebrow {
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.4em;
+  color: #c8a030;
+  text-transform: uppercase;
+}
+
+.combat-end-eyebrow--defeat {
+  color: #8a6a8a;
+}
+
+.combat-end-title {
+  font-family: 'Cinzel', serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #c8a030;
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 40px rgba(200,160,48,0.3);
+}
+
+.combat-end-lore {
+  font-family: 'Crimson Pro', serif;
+  font-size: 1.1rem;
+  color: #b09050;
+  font-style: italic;
+  line-height: 1.7;
+  max-width: 400px;
+}
+
+.combat-end-lore--defeat {
+  color: #90a8c0;
+  font-size: 1.3rem;
+}
+
+.combat-end-btn {
+  margin-top: 12px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  color: #c8a030;
+  border: 1px solid #c8a030;
+  border-radius: 6px;
+  padding: 12px 40px;
+  background: rgba(200,160,48,0.08);
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+}
+
+.combat-end-btn:hover {
+  background: rgba(200,160,48,0.15);
+  box-shadow: 0 0 20px rgba(200,160,48,0.2);
+}
+
+/* MOBILE */
+/* MOBILE */
+@media (max-width: 768px) {
+  .combat {
+    background-size: 140%;
+    background-position: center 40%;
+  }
+
+  /* Hide log on mobile */
+  .combat-log {
+    display: none;
+  }
+
+  /* Top controls all in one row */
+  .combat-flee-corner {
+    top: 12px;
+    left: 12px;
+  }
+  .combat-side-controls {
+    top: 12px;
+    right: 12px;
+    flex-direction: row;
+    gap: 6px;
+  }
+
+  /* Stats stack */
+  .combat-stats {
+    flex-direction: column;
+    gap: 0;
+  }
+  .combat-stat-block {
+    width: 100%;
+  }
+
+  /* Enemy bar pushed below the top buttons, right-aligned */
+  .combat-stat-block--enemy {
+    margin-top: 70px;
+    margin-left: auto;
+    width: 55%;
+  }
+
+  /* Kaen bar fixed bottom-left, higher so it clears Your Turn */
+  .combat-stat-block--player {
+    position: fixed;
+    bottom: 270px;
+    left: 12px;
+    width: 200px;
+    z-index: 4;
+  }
+
+  /* Intent — higher and right-aligned, sits over the Remnant */
+  .combat-intent {
+    align-self: flex-end;
+    margin-top: 8px;
+    margin-right: 0;
+    max-width: 55%;
+  }
+
+  /* Moves 2x2 */
+  .combat-moves {
+    grid-template-columns: 1fr 1fr;
+  }
+}
