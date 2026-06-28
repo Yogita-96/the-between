@@ -358,11 +358,12 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: center top;
 }
 
 .combat-end-art--defeat {
   filter: grayscale(0.3) brightness(0.7);
+  object-position: center 10%;
 }
 
 .combat-end-overlay {
@@ -440,7 +441,7 @@
 
 /* MOBILE */
 /* MOBILE */
-@media (max-width: 768px) {
+@media (max-width: 769px) {
   .combat {
     background-size: 140%;
     background-position: center 40%;
@@ -499,5 +500,9 @@
   /* Moves 2x2 */
   .combat-moves {
     grid-template-columns: 1fr 1fr;
+  }
+
+   .combat-end-art--defeat {
+    object-position: center 30%;
   }
 }

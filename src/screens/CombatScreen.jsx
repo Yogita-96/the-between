@@ -32,17 +32,18 @@ const DEFEAT_LINES = {
 
 // ─── ENEMY INTENT POOLS (atmospheric + functional) ───────────
 const REMNANT_INTENTS = [
-  { type: 'attack', label: 'Reach', line: "It reaches for you with what's left of its hands.", dmg: 18 },
-  { type: 'attack', label: 'Wail', line: "It opens its mouth and the sound takes something from you.", dmg: 12, drainStamina: 1 },
-  { type: 'guard', label: 'Fold', line: "It folds inward, bracing against what comes.", dmg: 0 },
+  { type: 'attack', label: 'Reach', line: "It reaches for you with what's left of its hands.", dmg: 22, posture: 25 },
+  { type: 'attack', label: 'Wail', line: "It opens its mouth and the sound takes something from you.", dmg: 15, drainStamina: 1, posture: 20 },
+  { type: 'attack', label: 'Clutch', line: "It seizes you, dragging you toward the dark.", dmg: 18, posture: 30 },
+  { type: 'guard', label: 'Fold', line: "It folds inward, bracing against what comes.", dmg: 0, posture: 0 },
 ]
 
 // ─── PLAYER MOVES (Kaen) ─────────────────────────────────────
 const KAEN_MOVES = [
-  { name: 'Greatsword Strike', cost: 3, dmg: 20, posture: 15, desc: '20 dmg · posture +15' },
-  { name: 'Shield Bash', cost: 2, dmg: 8, posture: 25, desc: '8 dmg · posture +25' },
-  { name: 'Endure', cost: 1, dmg: 0, posture: 0, desc: 'Absorb next hit, counter', special: 'endure' },
-  { name: 'Ruin Strike', cost: 4, dmg: 16, posture: 10, desc: 'More dmg at low HP', special: 'ruin' },
+  { name: 'Greatsword Strike', cost: 3, dmg: 20, posture: 12, desc: '20 dmg · posture +12' },
+  { name: 'Shield Bash', cost: 2, dmg: 8, posture: 18, desc: '8 dmg · posture +18' },
+  { name: 'Endure', cost: 1, dmg: 0, posture: 0, desc: 'Brace — block & steady posture', special: 'endure' },
+  { name: 'Ruin Strike', cost: 4, dmg: 16, posture: 8, desc: 'More dmg at low HP', special: 'ruin' },
 ]
 
 export default function CombatScreen({ character, node, onWin, onLose, onFlee }) {
@@ -55,10 +56,11 @@ export default function CombatScreen({ character, node, onWin, onLose, onFlee })
   const [playerHP, setPlayerHP] = useState(character?.stats?.hp || 100)
   const [playerMaxHP] = useState(character?.stats?.hp || 100)
   const [playerST, setPlayerST] = useState(5)
-  const [playerPosture] = useState(0)
+  const [playerPosture, setPlayerPosture] = useState(0)
+  const [playerStaggered, setPlayerStaggered] = useState(false)
 
-  const [enemyHP, setEnemyHP] = useState(60)
-  const [enemyMaxHP] = useState(60)
+  const [enemyHP, setEnemyHP] = useState(80)
+  const [enemyMaxHP] = useState(80)
   const [enemyPosture, setEnemyPosture] = useState(0)
   const [enemyStaggered, setEnemyStaggered] = useState(false)
 
@@ -102,21 +104,25 @@ export default function CombatScreen({ character, node, onWin, onLose, onFlee })
 
     setPlayerST(st => st - move.cost)
 
+    // Endure — brace and steady posture
     if (move.special === 'endure') {
       setEnduring(true)
-      addLog('Kaen braces, ready to counter.')
+      setPlayerPosture(p => Math.max(0, p - 30))
+      addLog('Kaen braces — posture steadied.')
     }
 
+    // Apply damage to enemy
     if (dmg > 0) {
       setEnemyHP(hp => Math.max(0, hp - dmg))
       addLog(`Kaen uses ${move.name} — ${dmg} dmg.`)
     }
 
+    // Build enemy posture
     if (move.posture > 0) {
       setEnemyPosture(p => Math.min(100, p + move.posture))
     }
 
-    // Resolve enemy death or move to enemy phase
+    // Move to enemy phase
     setPhase('enemy')
   }
 
@@ -136,7 +142,6 @@ export default function CombatScreen({ character, node, onWin, onLose, onFlee })
         setEnemyStaggered(true)
         setEnemyPosture(0)
         addLog('The Remnant breaks — staggered!')
-        // Enemy skips this turn
         setPlayerST(5)
         rollIntent()
         setPhase('player')
@@ -146,19 +151,32 @@ export default function CombatScreen({ character, node, onWin, onLose, onFlee })
       // Enemy was staggered last turn — recovers, skips attack
       if (enemyStaggered) {
         setEnemyStaggered(false)
+      } else if (playerStaggered) {
+        // Player was staggered — enemy lands a free heavy hit
+        setPlayerStaggered(false)
+        setPlayerHP(hp => Math.max(0, hp - 25))
+        addLog('Staggered! The Remnant strikes you unguarded — 25 dmg.')
       } else {
         // Enemy executes its telegraphed intent
         if (intent.type === 'attack') {
           if (enduring) {
-            addLog(`Kaen absorbs the blow and counters!`)
-            setEnemyHP(hp => Math.max(0, hp - 10))
+            addLog('Kaen absorbs the blow — no damage taken.')
             setEnduring(false)
           } else {
             let incoming = intent.dmg
-            setPlayerHP(hp => {
-              const nh = Math.max(0, hp - incoming)
-              return nh
-            })
+            setPlayerHP(hp => Math.max(0, hp - incoming))
+            // Build player posture
+            if (intent.posture > 0) {
+              setPlayerPosture(p => {
+                const np = Math.min(100, p + intent.posture)
+                if (np >= 100) {
+                  setPlayerStaggered(true)
+                  addLog('Your guard shatters — you are staggered!')
+                  return 0
+                }
+                return np
+              })
+            }
             if (intent.drainStamina) {
               addLog(`${intent.line} (-${intent.drainStamina} ST next turn)`)
             } else {
@@ -167,6 +185,7 @@ export default function CombatScreen({ character, node, onWin, onLose, onFlee })
           }
         } else {
           addLog('The Remnant folds inward, guarding.')
+          setPlayerPosture(p => Math.max(0, p - 10))
         }
       }
 
@@ -176,7 +195,6 @@ export default function CombatScreen({ character, node, onWin, onLose, onFlee })
           setPhase('lost')
           return 0
         }
-        // New player turn
         setPlayerST(5)
         rollIntent()
         setPhase('player')
@@ -185,9 +203,7 @@ export default function CombatScreen({ character, node, onWin, onLose, onFlee })
     }, 900)
 
     return () => clearTimeout(t)
-  }, [phase, enemyHP, enemyPosture, enemyStaggered, intent, enduring, rollIntent, addLog])
-
- 
+  }, [phase, enemyHP, enemyPosture, enemyStaggered, playerStaggered, intent, enduring, rollIntent, addLog])
 
   // ─── VICTORY SCREEN ────────────────────────────────────────
   if (phase === 'won') {
@@ -231,15 +247,16 @@ export default function CombatScreen({ character, node, onWin, onLose, onFlee })
   return (
     <div className="combat" style={{ backgroundImage: `url(${combatBg})` }}>
       <div className="combat-overlay" />
-      {/* Side controls — fixed to screen margins */}
-<button className="combat-side-btn combat-flee-corner" onClick={() => onFlee?.()}>
-  ⚔ Flee
-</button>
 
-<div className="combat-side-controls">
-  <button className="combat-side-btn" onClick={() => onFlee?.()}>⚙ Settings</button>
-  <button className="combat-side-btn" onClick={() => onFlee?.()}>✦ Map</button>
-</div>
+      {/* Side controls — fixed to screen margins */}
+      <button className="combat-side-btn combat-flee-corner" onClick={() => onFlee?.()}>
+        ⚔ Flee
+      </button>
+
+      <div className="combat-side-controls">
+        <button className="combat-side-btn" onClick={() => onFlee?.()}>⚙ Settings</button>
+        <button className="combat-side-btn" onClick={() => onFlee?.()}>✦ Map</button>
+      </div>
 
       <div className="combat-content">
         {/* Top stat bars */}
@@ -300,12 +317,12 @@ export default function CombatScreen({ character, node, onWin, onLose, onFlee })
           {[...log].reverse().map((entry, i, arr) => {
             const fromBottom = arr.length - 1 - i
             return (
-        <div key={i} className="combat-log-entry" style={{ opacity: 1 - fromBottom * 0.28 }}>
-        {entry}
+              <div key={i} className="combat-log-entry" style={{ opacity: 1 - fromBottom * 0.28 }}>
+                {entry}
+              </div>
+            )
+          })}
         </div>
-        )
-     })}
-   </div>
 
         {/* Moves */}
         <div className="combat-moves-wrap">
