@@ -2,17 +2,16 @@ import { useState } from 'react'
 import betweenBg from '../assets/the-between-bg.png'
 import './MapScreen.css'
 
-// Map structure: 3 floors, 5 nodes total
-// Floor 1: 2 Remnant encounters
-// Floor 2: 1 Remnant + 1 Unfinished (elite)
+// ─── MAP STRUCTURE ────────────────────────────────────────────
+// Floor 1: 2 Remnants (sequential)
+// Floor 2: 1 Dual-Remnant node + 1 Unfinished (elite)
 // Floor 3: 1 Cartographer (boss)
-
 const MAP_NODES = [
-  { id: 1, floor: 1, type: 'remnant', label: 'The Remnant', sublabel: 'Standard Encounter', icon: '✦', col: 0, row: 0 },
-  { id: 2, floor: 1, type: 'remnant', label: 'The Remnant', sublabel: 'Standard Encounter', icon: '✦', col: 0, row: 1 },
-  { id: 3, floor: 2, type: 'remnant', label: 'The Remnant', sublabel: 'Stronger Variant', icon: '✦', col: 1, row: 0 },
-  { id: 4, floor: 2, type: 'elite', label: 'The Unfinished', sublabel: 'Elite Encounter', icon: '⚿', col: 1, row: 1 },
-  { id: 5, floor: 3, type: 'boss', label: 'The Cartographer', sublabel: 'Final Boss', icon: '☽', col: 2, row: 0 },
+  { id: 1, floor: 1, type: 'remnant',  label: 'The Remnant',      sublabel: 'Standard Encounter', icon: '✦' },
+  { id: 2, floor: 1, type: 'remnant',  label: 'The Remnant',      sublabel: 'Standard Encounter', icon: '✦' },
+  { id: 3, floor: 2, type: 'remnant',  label: 'Two Remnants',     sublabel: 'Dual Encounter',     icon: '✦' },
+  { id: 4, floor: 2, type: 'elite',    label: 'The Unfinished',   sublabel: 'Elite Encounter',    icon: '⚿' },
+  { id: 5, floor: 3, type: 'boss',     label: 'The Cartographer', sublabel: 'Final Boss',         icon: '☽' },
 ]
 
 const FLOOR_LABELS = ['Floor I', 'Floor II', 'Floor III']
@@ -20,49 +19,37 @@ const FLOOR_LABELS = ['Floor I', 'Floor II', 'Floor III']
 export default function MapScreen({ character, onEnterCombat, completedNodes = [] }) {
   const [hoveredNode, setHoveredNode] = useState(null)
 
-  // Determine which node is currently available
   const getNodeState = (node) => {
+    // Already cleared
     if (completedNodes.includes(node.id)) return 'done'
 
-    // First available node after completed ones
-    const floorCompleted = MAP_NODES.filter(
-      (n) => n.floor === node.floor && completedNodes.includes(n.id)
-    ).length
-    const floorTotal = MAP_NODES.filter((n) => n.floor === node.floor).length
+    const nodesOnFloor    = MAP_NODES.filter(n => n.floor === node.floor)
+    const clearedOnFloor  = nodesOnFloor.filter(n => completedNodes.includes(n.id))
+    const prevFloorNodes  = MAP_NODES.filter(n => n.floor === node.floor - 1)
+    const prevFloorCleared = prevFloorNodes.every(n => completedNodes.includes(n.id))
 
-    // Floor 1 nodes are always available at start
-    if (node.floor === 1 && completedNodes.length === 0) return 'available'
+    // Floor 1 — both nodes always available from the start
+    if (node.floor === 1) return 'available'
 
-    // For floor 1 second node - available after first is done
-    if (node.floor === 1 && node.id === 2 && completedNodes.includes(1)) return 'available'
+    // All other floors — previous floor must be fully cleared first
+    if (!prevFloorCleared) return 'locked'
 
-    // Floor 2 available after floor 1 complete
-    const floor1Done = MAP_NODES.filter(
-      (n) => n.floor === 1 && completedNodes.includes(n.id)
-    ).length === 2
+    // Within the floor — nodes unlock sequentially
+    const nodeIndex = nodesOnFloor.indexOf(node)
+    if (nodeIndex === 0) return 'available'
 
-    if (node.floor === 2 && floor1Done) return 'available'
-
-    // Floor 3 available after floor 2 complete
-    const floor2Done = MAP_NODES.filter(
-      (n) => n.floor === 2 && completedNodes.includes(n.id)
-    ).length === 2
-
-    if (node.floor === 3 && floor2Done) return 'available'
-
-    return 'locked'
+    // Next node unlocks only after the previous one on this floor is cleared
+    const prevNode = nodesOnFloor[nodeIndex - 1]
+    return completedNodes.includes(prevNode.id) ? 'available' : 'locked'
   }
 
-  const nodesByFloor = FLOOR_LABELS.map((label, i) =>
-    MAP_NODES.filter((n) => n.floor === i + 1)
+  const nodesByFloor = FLOOR_LABELS.map((_, i) =>
+    MAP_NODES.filter(n => n.floor === i + 1)
   )
 
   return (
     <div className="map-screen">
-      <div
-        className="map-bg"
-        style={{ backgroundImage: `url(${betweenBg})` }}
-      />
+      <div className="map-bg" style={{ backgroundImage: `url(${betweenBg})` }} />
       <div className="map-overlay" />
 
       <div className="map-content">
@@ -96,7 +83,7 @@ export default function MapScreen({ character, onEnterCombat, completedNodes = [
               <div className="map-floor-label">{FLOOR_LABELS[floorIndex]}</div>
               <div className="map-floor-nodes">
                 {floorNodes.map((node) => {
-                  const state = getNodeState(node)
+                  const state     = getNodeState(node)
                   const isHovered = hoveredNode?.id === node.id
 
                   return (
@@ -109,15 +96,14 @@ export default function MapScreen({ character, onEnterCombat, completedNodes = [
                         disabled={state !== 'available'}
                       >
                         <span style={{
-                         color: node.type === 'boss' ? '#c03030' : 
-                                node.type === 'elite' ? '#c87830' : '#c8a030',
-                         fontSize: node.type === 'boss' ? '1.8rem' : 
-                                   node.type === 'elite' ? '1.4rem' : '1.2rem',
-                         opacity: state === 'locked' ? 0.3 : 0.9
+                          color:    node.type === 'boss'  ? '#c03030' :
+                                    node.type === 'elite' ? '#c87830' : '#c8a030',
+                          fontSize: node.type === 'boss'  ? '1.8rem'  :
+                                    node.type === 'elite' ? '1.4rem'  : '1.2rem',
+                          opacity:  state === 'locked' ? 0.3 : 0.9,
                         }}>
-                           {node.icon} 
+                          {node.icon}
                         </span>
-                    
                         {state === 'done' && (
                           <span className="map-node-checkmark">✓</span>
                         )}
@@ -133,7 +119,6 @@ export default function MapScreen({ character, onEnterCombat, completedNodes = [
                         </div>
                       )}
 
-                      {/* Connector line between nodes in same floor */}
                       {floorNodes.indexOf(node) < floorNodes.length - 1 && (
                         <div className={`map-connector ${
                           completedNodes.includes(node.id) ? 'map-connector--done' : ''

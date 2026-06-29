@@ -1,0 +1,227 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap');
+
+.reward-screen {
+  position: relative;
+  min-height: 100vh;
+  background-color: #06080f;
+  background-image: url('../assets/the-between-bg.png');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cinzel', serif;
+  overflow: hidden;
+}
+
+.reward-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 40%,
+    rgba(6,8,15,0.7) 0%,
+    rgba(6,8,15,0.96) 80%);
+  z-index: 1;
+}
+
+.reward-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 24px;
+  max-width: 560px;
+  width: 100%;
+  text-align: center;
+}
+
+.reward-eyebrow {
+  font-size: 0.65rem;
+  letter-spacing: 0.4em;
+  color: #c8a030;
+  text-transform: uppercase;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+}
+
+.reward-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #f0d878;
+  letter-spacing: 0.06em;
+  text-shadow:
+    0 2px 4px rgba(0,0,0,1),
+    0 4px 24px rgba(0,0,0,0.95);
+  margin: 0;
+}
+
+.reward-lore {
+  font-family: 'Crimson Pro', serif;
+  font-size: 1rem;
+  font-style: italic;
+  color: #d8e8f0;
+  line-height: 1.6;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.9);
+  margin: 0;
+}
+
+.reward-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 300px;
+  margin: 4px 0;
+}
+
+.reward-dash {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #3a2a10, transparent);
+}
+
+.reward-gem {
+  color: #c8a030;
+  font-size: 0.7rem;
+}
+
+.reward-instruction {
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  color: #c8a030;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+/* ── REWARD OPTIONS ── */
+.reward-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.reward-option {
+  background: rgba(14,16,22,0.88);
+  border: 1px solid #3a3020;
+  border-radius: 0;
+  padding: 16px 20px;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  position: relative;
+  transition: all 0.2s ease;
+  font-family: 'Cinzel', serif;
+  outline: 1px solid #2a2010;
+  outline-offset: -4px;
+}
+
+/* Gold corner brackets */
+.reward-option::before,
+.reward-option::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-color: #c8a030;
+  border-style: solid;
+  border-width: 0;
+}
+.reward-option::before {
+  top: 3px; left: 3px;
+  border-top-width: 1px;
+  border-left-width: 1px;
+}
+.reward-option::after {
+  bottom: 3px; right: 3px;
+  border-bottom-width: 1px;
+  border-right-width: 1px;
+}
+
+.reward-option:hover:not(:disabled) {
+  background: rgba(200,160,48,0.08);
+  border-color: #c8a030;
+  outline-color: #5a4a20;
+  transform: translateX(4px);
+}
+
+.reward-option.chosen {
+  background: rgba(200,160,48,0.15);
+  border-color: #c8a030;
+}
+
+.reward-option:disabled {
+  cursor: default;
+}
+
+.reward-option-tag {
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #7a6a40;
+}
+
+.reward-option--card    .reward-option-tag { color: #5a9a50; }
+.reward-option--upgrade .reward-option-tag { color: #5a7aaa; }
+.reward-option--boost   .reward-option-tag { color: #aa5a7a; }
+
+.reward-option-name {
+  font-size: 0.9rem;
+  color: #c8a030;
+  letter-spacing: 0.04em;
+}
+
+.reward-option-desc {
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.8rem;
+  color: #7a6a50;
+  font-style: italic;
+}
+
+/* ── SKIP BUTTON ── */
+.reward-skip-btn {
+  margin-top: 8px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #c8a030;
+  background: rgba(14,16,22,0.88);
+  border: 1px solid #3a3020;
+  outline: 1px solid #2a2010;
+  outline-offset: -4px;
+  cursor: pointer;
+  padding: 12px 32px;
+  width: 100%;
+  transition: all 0.2s;
+}
+
+.reward-skip-btn:hover:not(:disabled) {
+  border-color: #c8a030;
+  background: rgba(200,160,48,0.06);
+  color: #f0d878;
+}
+
+.reward-skip-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* ── MOBILE ── */
+@media (max-width: 769px) {
+  .reward-content {
+    padding: 32px 16px;
+    gap: 10px;
+  }
+
+  .reward-title {
+    font-size: 1.4rem;
+  }
+
+  .reward-option {
+    padding: 14px 16px;
+  }
+}
