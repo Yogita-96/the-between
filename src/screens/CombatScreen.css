@@ -17,10 +17,10 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(to bottom,
-    rgba(6,8,15,0.55) 0%,
-    rgba(6,8,15,0.15) 25%,
-    rgba(6,8,15,0.15) 55%,
-    rgba(6,8,15,0.9) 100%);
+    rgba(6,8,15,0.35) 0%,     /* was 0.55 — lighter top */
+    rgba(6,8,15,0.08) 25%,    /* was 0.15 */
+    rgba(6,8,15,0.08) 55%,    /* was 0.15 */
+    rgba(6,8,15,0.88) 100%);  /* bottom stays dark for UI */
   z-index: 1;
 }
 
@@ -346,6 +346,8 @@
 .combat-end {
   position: relative;
   min-height: 100vh;
+  width: 100%;
+  background-color: #06080f;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -362,14 +364,19 @@
 }
 
 .combat-end-art--defeat {
-  filter: grayscale(0.3) brightness(0.7);
+  filter: grayscale(0.1) brightness(1.2); 
+  object-fit: cover;
   object-position: center 10%;
+  width: 100%;
+  height: 100%;
 }
 
 .combat-end-overlay {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 50% 50%, rgba(6,8,15,0.4) 0%, rgba(6,8,15,0.92) 80%);
+  background: radial-gradient(ellipse at 50% 40%,
+    rgba(6,8,15,0.1) 0%,     
+    rgba(6,8,15,0.65) 80%); 
 }
 
 .combat-end-content {
@@ -388,63 +395,81 @@
   font-family: 'Cinzel', serif;
   font-size: 0.7rem;
   letter-spacing: 0.4em;
-  color: #c8a030;
+  color: #e8d080;
   text-transform: uppercase;
+  text-shadow:
+    0 2px 12px rgba(0,0,0,0.95),
+    0 0 40px rgba(0,0,0,0.8);
 }
-
-.combat-end-eyebrow--defeat {
-  color: #8a6a8a;
+ 
+.combat-end-art--defeat {
+  filter: grayscale(0.1) brightness(1.5); 
+  object-fit: cover;
+  object-position: center 10%;
+  width: 100%;
+  height: 100%;
 }
-
+ 
 .combat-end-title {
   font-family: 'Cinzel', serif;
   font-size: 2.2rem;
   font-weight: 700;
-  color: #c8a030;
+  color: #f0d878;
   letter-spacing: 0.06em;
-  text-shadow: 0 0 40px rgba(200,160,48,0.3);
+  text-shadow:
+    0 2px 4px rgba(0,0,0,1),
+    0 4px 24px rgba(0,0,0,0.95),
+    0 0 60px rgba(0,0,0,0.7);
 }
-
+ 
 .combat-end-lore {
   font-family: 'Crimson Pro', serif;
   font-size: 1.1rem;
-  color: #b09050;
+  /* Cooler, lighter tone so it reads off the warm amber bg */
+  color: #d8e8f0;
   font-style: italic;
   line-height: 1.7;
   max-width: 400px;
+  text-shadow:
+    0 1px 3px rgba(0,0,0,1),
+    0 2px 16px rgba(0,0,0,0.95),
+    0 0 32px rgba(0,0,0,0.8);
 }
-
+ 
 .combat-end-lore--defeat {
   color: #90a8c0;
   font-size: 1.3rem;
 }
-
+ 
 .combat-end-btn {
   margin-top: 12px;
   font-family: 'Cinzel', serif;
   font-size: 0.8rem;
   letter-spacing: 0.2em;
-  color: #c8a030;
+  color: #f0d878;
   border: 1px solid #c8a030;
   border-radius: 6px;
   padding: 12px 40px;
-  background: rgba(200,160,48,0.08);
+  /* Darker background so the button punches off the bright art */
+  background: rgba(6,8,15,0.65);
   cursor: pointer;
   text-transform: uppercase;
   transition: all 0.3s ease;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.9);
 }
-
+ 
 .combat-end-btn:hover {
-  background: rgba(200,160,48,0.15);
-  box-shadow: 0 0 20px rgba(200,160,48,0.2);
+  background: rgba(200,160,48,0.18);
+  box-shadow: 0 0 20px rgba(200,160,48,0.25);
+  border-color: #f0d878;
 }
 
 /* MOBILE */
 /* MOBILE */
 @media (max-width: 769px) {
-  .combat {
-    background-size: 140%;
-    background-position: center 40%;
+.combat {
+    background-size: contain;
+    background-position: center 45%;
   }
 
   /* Hide log on mobile */
@@ -492,7 +517,7 @@
   /* Intent — higher and right-aligned, sits over the Remnant */
   .combat-intent {
     align-self: flex-end;
-    margin-top: 8px;
+    margin-top: 5px;
     margin-right: 0;
     max-width: 55%;
   }
@@ -505,4 +530,135 @@
    .combat-end-art--defeat {
     object-position: center 30%;
   }
+}
+
+/* ── SHUFFLE BUTTON ───────────────────────────────────────── */
+
+.combat-shuffle-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.combat-shuffle-btn {
+  font-family: 'Cinzel', serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #a08828;
+  background: rgba(14,16,22,0.7);
+  border: 1px solid #3a3020;
+  border-radius: 4px;
+  padding: 7px 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s;
+}
+
+.combat-shuffle-btn:hover:not(.disabled) {
+  border-color: #c8a030;
+  color: #c8a030;
+  background: rgba(200,160,48,0.08);
+}
+
+.combat-shuffle-btn.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.combat-shuffle-cost {
+  font-size: 0.55rem;
+  color: #6a5a30;
+  letter-spacing: 0.08em;
+}
+
+.combat-shuffle-btn:hover:not(.disabled) .combat-shuffle-cost {
+  color: #9a8040;
+}
+
+/* Exploit locked state — subtle red tint to signal the condition */
+.combat-move.locked {
+  opacity: 0.45;
+  outline-color: #5a2a2a;
+}
+
+.combat-move.locked .combat-move-name {
+  color: #a06040;
+}
+
+/* Mobile — shuffle button stays readable */
+@media (max-width: 769px) {
+  .combat-shuffle-btn {
+    font-size: 0.6rem;
+    padding: 6px 16px;
+    gap: 8px;
+  }
+
+  .combat-shuffle-cost {
+    font-size: 0.5rem;
+  }
+}
+
+.combat-toast {
+  position: fixed !important;
+  top: 50vh;
+  left: 50vw;
+  transform: translate(-50%, -50%);
+  background: rgba(10,10,16,0.97);
+  border: 1px solid #c8a030;
+  border-radius: 8px;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 9999;
+  cursor: pointer;
+  animation: toast-in 0.15s ease;
+  max-width: 280px;
+  text-align: center;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.95);
+}
+ 
+.combat-toast-icon {
+  font-size: 1rem;
+  color: #c8a030;
+  flex-shrink: 0;
+}
+ 
+.combat-toast-msg {
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.9rem;
+  font-style: italic;
+  color: #d8c89a;
+  line-height: 1.5;
+}
+ 
+.combat-toast-msg strong {
+  color: #c8a030;
+  font-style: normal;
+  font-weight: 600;
+}
+ 
+@keyframes toast-in {
+  from { opacity: 0; top: 48vh; }
+  to   { opacity: 1; top: 50vh; }
+}
+ 
+@media (max-width: 769px) {
+  .combat-toast {
+    max-width: 240px;
+    padding: 14px 18px;
+  }
+ 
+  .combat-toast-msg {
+    font-size: 0.82rem;
+  }
+}
+ 
+.combat-toast-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
 }
