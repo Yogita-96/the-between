@@ -1,11 +1,74 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import TitleScreen from './screens/TitleScreen'
+import MainMenuScreen from './screens/MainMenuScreen'
+import CompendiumScreen from './screens/CompendiumScreen'
+import CreditsScreen from './screens/CreditsScreen'
 import CharSelectScreen from './screens/CharSelectScreen'
 import MapScreen from './screens/MapScreen'
 import CombatScreen from './screens/CombatScreen'
 import RewardScreen from './screens/RewardScreen'
 import { KAEN_BASE_POOL, SABLE_BASE_POOL } from './data/cards'
+import { loadSettings } from './utils/settings'
+import bgMusic from './assets/audio/the-between-music.mp3'
 import './index.css'
+
+// ─── AMBIENT MUSIC ────────────────────────────────────────────
+// Plays on menu/lore screens, Map, and Victory/Defeat screens.
+// Silent during active Combat. combatEndPhase tracks whether
+// CombatScreen is currently showing its won/lost screen (music
+// resumes there) vs active fighting (music stays silent).
+const MUSIC_SCREENS = ['mainmenu', 'compendium', 'credits', 'charselect', 'map']
+
+function useAmbientMusic(src, shouldPlay) {
+  const audioRef = useRef(null)
+  const targetVolRef = useRef(loadSettings().musicVolume)
+
+  useEffect(() => {
+    if (!audioRef.current) {
+      const audio = new Audio(src)
+      audio.loop = true
+      audio.volume = 0
+      audioRef.current = audio
+    }
+    return () => {
+      audioRef.current?.pause()
+    }
+  }, [src])
+
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    let fadeInterval
+    if (shouldPlay) {
+      audio.play().catch(() => {})
+      fadeInterval = setInterval(() => {
+        const target = targetVolRef.current
+        audio.volume = Math.min(audio.volume + 0.02, target)
+        if (audio.volume >= target) clearInterval(fadeInterval)
+      }, 80)
+    } else {
+      fadeInterval = setInterval(() => {
+        audio.volume = Math.max(audio.volume - 0.03, 0)
+        if (audio.volume <= 0) {
+          clearInterval(fadeInterval)
+          audio.pause()
+        }
+      }, 60)
+    }
+    return () => clearInterval(fadeInterval)
+  }, [shouldPlay])
+
+  // Live volume update — called from SettingsModal while music plays
+  const setMusicVolume = (vol) => {
+    targetVolRef.current = vol
+    if (audioRef.current && audioRef.current.volume > 0) {
+      audioRef.current.volume = vol
+    }
+  }
+
+  return setMusicVolume
+}
 
 // ─── SECOND REMNANT TRANSITION LINES ─────────────────────────
 const SECOND_REMNANT_LINES = [
@@ -36,6 +99,41 @@ function App() {
   const [transitionMsg,   setTransitionMsg]   = useState('')
   const [pendingReward,   setPendingReward]   = useState(null) // { floor, isElite } passed to RewardScreen
 
+  // ─── PERSISTENT CARD UNLOCKS ──────────────────────────────────
+  // Card names the player has discovered across ALL runs, ever.
+  // Survives resets and browser refresh (localStorage), unlike runDeck.
+  const [unlockedCards, setUnlockedCards] = useState(() => {
+    try {
+      const saved = localStorage.getItem('between-unlocked-cards')
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
+
+  const unlockCard = (cardName) => {
+    setUnlockedCards(prev => {
+      if (prev.includes(cardName)) return prev
+      const updated = [...prev, cardName]
+      try {
+        localStorage.setItem('between-unlocked-cards', JSON.stringify(updated))
+      } catch {
+        // localStorage unavailable — fail silently
+      }
+      return updated
+    })
+  }
+
+  // Tracks whether CombatScreen is currently showing Victory/Defeat
+  // (music should play) vs active fighting (music stays silent)
+  const [combatEndPhase, setCombatEndPhase] = useState(false)
+
+  // Music plays on menu/lore/map screens, and during combat's
+  // win/lose screens — but stays silent during active fighting
+  const inCombatScreen = screen === 'combat'
+  const shouldPlayMusic = MUSIC_SCREENS.includes(screen) || (inCombatScreen && combatEndPhase)
+  const setMusicVolume = useAmbientMusic(bgMusic, shouldPlayMusic)
+
   // ─── RESET HELPERS ───────────────────────────────────────────
 
   const fullReset = () => {
@@ -47,6 +145,20 @@ function App() {
     setRunDeck([])
     setDualPhase('first')
     setScreen('charselect')
+  }
+
+  // Same as fullReset but exits all the way to Title, not Char Select —
+  // used when the player explicitly quits a run from the Map screen
+  const quitToTitle = () => {
+    setCompletedNodes([])
+    setFailedNodes([])
+    setCurrentNode(null)
+    setRunHP(null)
+    setRunMaxHP(null)
+    setRunDeck([])
+    setDualPhase('first')
+    setSelectedChar(null)
+    setScreen('title')
   }
 
   const floor2Reset = () => {
@@ -69,6 +181,7 @@ function App() {
   const handleEnterCombat = (node) => {
     setCurrentNode(node)
     setDualPhase('first')
+    setCombatEndPhase(false)
     setScreen('combat')
   }
 
@@ -139,6 +252,8 @@ function App() {
       if (reward.type === 'card') {
         // Add new card to run deck
         setRunDeck(prev => [...prev, reward.card])
+        // Permanently mark this card as discovered in the Compendium
+        unlockCard(reward.card.name)
       } else if (reward.type === 'upgrade') {
         // Apply upgrade — card may be in base pool or runDeck
         // Store upgraded version in runDeck so it overrides base pool in activeDeck
@@ -196,7 +311,28 @@ function App() {
   return (
     <div className="app">
       {screen === 'title' && (
-        <TitleScreen onBegin={() => setScreen('charselect')} />
+        <TitleScreen onBegin={() => setScreen('mainmenu')} />
+      )}
+
+      {screen === 'mainmenu' && (
+        <MainMenuScreen
+          onBegin={() => setScreen('charselect')}
+          onCompendium={() => setScreen('compendium')}
+          onCredits={() => setScreen('credits')}
+          onMusicVolumeChange={setMusicVolume}
+        />
+      )}
+
+      {screen === 'compendium' && (
+        <CompendiumScreen
+          unlockedCards={unlockedCards}
+          onBack={() => setScreen('mainmenu')}
+          onMusicVolumeChange={setMusicVolume}
+        />
+      )}
+
+      {screen === 'credits' && (
+        <CreditsScreen onBack={() => setScreen('mainmenu')} />
       )}
 
       {screen === 'charselect' && (
@@ -210,6 +346,7 @@ function App() {
             setFailedNodes([])
             setScreen('map')
           }}
+          onBack={() => setScreen('mainmenu')}
         />
       )}
 
@@ -218,6 +355,8 @@ function App() {
           character={selectedChar}
           completedNodes={completedNodes}
           onEnterCombat={handleEnterCombat}
+          onQuitToTitle={quitToTitle}
+          onMusicVolumeChange={setMusicVolume}
         />
       )}
 
@@ -236,7 +375,8 @@ function App() {
           runDeck={activeDeck}
           onWin={(node, survivingHP) => handleWin(node, survivingHP)}
           onLose={(node) => handleLose(node)}
-          onFlee={() => setScreen('map')}
+          onCombatEndPhaseChange={setCombatEndPhase}
+          onMusicVolumeChange={setMusicVolume}
         />
       )}
 

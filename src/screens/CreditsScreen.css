@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap');
+
+.credits-screen {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cinzel', serif;
+}
+
+.credits-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.4);
+  transform: scale(1.05);
+}
+
+.credits-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 40%, rgba(6,8,15,0.55) 0%, rgba(6,8,15,0.92) 85%);
+}
+
+.credits-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 40px;
+  max-width: 460px;
+  width: 100%;
+  text-align: center;
+}
+
+.credits-eyebrow {
+  font-size: 0.75rem;
+  letter-spacing: 0.4em;
+  color: #b8902a;
+  text-transform: uppercase;
+}
+
+.credits-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #c8a030;
+  letter-spacing: 0.08em;
+}
+
+.credits-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 160px;
+  margin: 4px 0 12px;
+}
+
+.cr-dash {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #3a2a10, transparent);
+}
+
+.cr-gem {
+  width: 6px;
+  height: 6px;
+  background: #c8a030;
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+
+.credits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: 100%;
+}
+
+.credits-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.credits-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #8a6a3a;
+}
+
+.credits-text {
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.95rem;
+  font-style: italic;
+  color: #b09866;
+}
+
+.credits-link {
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.8rem;
+  color: #6a8aaa;
+  text-decoration: underline;
+  word-break: break-all;
+}
+
+.credits-back-btn {
+  font-family: 'Cinzel', serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  color: #c8a030;
+  background: rgba(10,8,4,0.85);
+  border: 1px solid #4a3818;
+  border-radius: 6px;
+  padding: 12px 32px;
+  cursor: pointer;
+  margin-top: 14px;
+  transition: all 0.2s;
+}
+
+.credits-back-btn:hover {
+  border-color: #c8a030;
+  background: rgba(200,160,48,0.1);
+}

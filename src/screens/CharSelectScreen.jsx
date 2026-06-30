@@ -6,8 +6,7 @@ import sableImg from '../assets/sable.png'
 import sableProfile from '../assets/sable-sideprofile.png'
 import sableAction from '../assets/sable-action.png'
 import betweenBg from '../assets/the-between-bg.png'
-import bgMusic from '../assets/audio/the-between-music.mp3'
-import clickSfx from '../assets/audio/click-basic.wav'
+import { playClick } from '../utils/audio'
 import './CharSelectScreen.css'
 
 const CHARACTERS = [
@@ -44,50 +43,6 @@ const CHARACTERS = [
     ],
   },
 ]
-
-// ─── AUDIO HELPERS ────────────────────────────────────────────
-function useAmbientMusic(src) {
-  const audioRef = useRef(null)
-
-  useEffect(() => {
-    const audio = new Audio(src)
-    audio.loop = true
-    audio.volume = 0
-    audioRef.current = audio
-
-    // Fade in over 2s
-    audio.play().catch(() => {}) // browsers may block autoplay — silently ignore
-    let vol = 0
-    const fade = setInterval(() => {
-      vol = Math.min(vol + 0.02, 0.45)
-      audio.volume = vol
-      if (vol >= 0.45) clearInterval(fade)
-    }, 80)
-
-    return () => {
-      clearInterval(fade)
-      // Fade out on unmount
-      let v = audio.volume
-      const fadeOut = setInterval(() => {
-        v = Math.max(v - 0.03, 0)
-        audio.volume = v
-        if (v <= 0) {
-          clearInterval(fadeOut)
-          audio.pause()
-          audio.src = ''
-        }
-      }, 60)
-    }
-  }, [src])
-
-  return audioRef
-}
-
-function playClick() {
-  const sfx = new Audio(clickSfx)
-  sfx.volume = 0.35
-  sfx.play().catch(() => {})
-}
 
 // ─── STAT BAR ─────────────────────────────────────────────────
 function StatBar({ value, max, color }) {
@@ -147,16 +102,20 @@ function CharPortrait({ char, isActive, onDotClick }) {
 }
 
 // ─── MAIN SCREEN ──────────────────────────────────────────────
-export default function CharSelectScreen({ onSelect }) {
+export default function CharSelectScreen({ onSelect, onBack }) {
   const [selected, setSelected] = useState(null)
   const [hovering, setHovering] = useState(null)
-
-  useAmbientMusic(bgMusic)
 
   return (
     <div className="charselect">
       <div className="charselect-bg" style={{ backgroundImage: `url(${betweenBg})` }} />
       <div className="charselect-overlay" />
+
+      {onBack && (
+        <button className="charselect-back-btn" onClick={() => { playClick(); onBack() }}>
+          ← Back
+        </button>
+      )}
 
       <div className="charselect-content">
         <p className="charselect-eyebrow">The Between</p>

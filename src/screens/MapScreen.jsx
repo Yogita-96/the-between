@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import betweenBg from '../assets/the-between-bg.png'
+import SettingsModal from '../components/SettingsModal'
+import { playClick } from '../utils/audio'
 import './MapScreen.css'
 
 // ─── MAP STRUCTURE ────────────────────────────────────────────
@@ -16,15 +18,16 @@ const MAP_NODES = [
 
 const FLOOR_LABELS = ['Floor I', 'Floor II', 'Floor III']
 
-export default function MapScreen({ character, onEnterCombat, completedNodes = [] }) {
+export default function MapScreen({ character, onEnterCombat, completedNodes = [], onQuitToTitle, onMusicVolumeChange }) {
   const [hoveredNode, setHoveredNode] = useState(null)
+  const [showSettings, setShowSettings] = useState(false)
+  const [showQuitConfirm, setShowQuitConfirm] = useState(false)
 
   const getNodeState = (node) => {
     // Already cleared
     if (completedNodes.includes(node.id)) return 'done'
 
     const nodesOnFloor    = MAP_NODES.filter(n => n.floor === node.floor)
-    const clearedOnFloor  = nodesOnFloor.filter(n => completedNodes.includes(n.id))
     const prevFloorNodes  = MAP_NODES.filter(n => n.floor === node.floor - 1)
     const prevFloorCleared = prevFloorNodes.every(n => completedNodes.includes(n.id))
 
@@ -51,6 +54,52 @@ export default function MapScreen({ character, onEnterCombat, completedNodes = [
     <div className="map-screen">
       <div className="map-bg" style={{ backgroundImage: `url(${betweenBg})` }} />
       <div className="map-overlay" />
+
+      <button
+        className="settings-icon-circular"
+        onClick={() => { playClick(); setShowSettings(true) }}
+        aria-label="Settings"
+      >
+        ⚙
+      </button>
+
+      <button
+        className="map-quit-btn"
+        onClick={() => { playClick(); setShowQuitConfirm(true) }}
+      >
+        ✕ Quit Run
+      </button>
+
+      {showSettings && (
+        <SettingsModal
+          onClose={() => setShowSettings(false)}
+          onMusicVolumeChange={onMusicVolumeChange}
+        />
+      )}
+
+      {showQuitConfirm && (
+        <div className="map-confirm-backdrop" onClick={() => setShowQuitConfirm(false)}>
+          <div className="map-confirm-box" onClick={e => e.stopPropagation()}>
+            <p className="map-confirm-text">
+              Leaving now abandons this run. Your progress will be lost.
+            </p>
+            <div className="map-confirm-btns">
+              <button className="map-confirm-cancel" onClick={() => setShowQuitConfirm(false)}>
+                Stay
+              </button>
+              <button
+                className="map-confirm-quit"
+                onClick={() => {
+                  setShowQuitConfirm(false)
+                  onQuitToTitle?.()
+                }}
+              >
+                Quit to Title
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="map-content">
         <div className="map-header">

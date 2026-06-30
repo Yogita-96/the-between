@@ -8,6 +8,7 @@ import kaenVictory from '../assets/kaen-victory.png'
 import sableVictory from '../assets/sable-victory.png'
 import remnantM from '../assets/remnant-m.png'
 import remnantF from '../assets/remnant-f.png'
+import SettingsModal from '../components/SettingsModal'
 import './CombatScreen.css'
 
 // ─── DEFEAT LINES BY ENEMY TIER ──────────────────────────────
@@ -63,7 +64,10 @@ function drawCards(pool, exclude = []) {
   return shuffle(source).slice(0, 4)
 }
 
-export default function CombatScreen({ character, node, isDualSecond = false, runDeck, onWin, onLose, onFlee }) {
+export default function CombatScreen({
+  character, node, isDualSecond = false, runDeck,
+  onWin, onLose, onCombatEndPhaseChange, onMusicVolumeChange,
+}) {
 
   // ─── CHARACTER BRANCH ──────────────────────────────────────
   const isKaen     = character?.id === 'kaen' || character?.name?.toLowerCase() === 'kaen'
@@ -72,9 +76,13 @@ export default function CombatScreen({ character, node, isDualSecond = false, ru
     () => runDeck?.length > 0 ? runDeck : BASE_POOL,
     [runDeck, BASE_POOL]
   )
-  // Ref so effect closures always see current pool without re-triggering the effect
+  // Ref so effect closures always see current pool without re-triggering the effect.
+  // Updated in an effect (not during render) per React's rules-of-hooks.
   const poolRef = useRef(MOVES_POOL)
-  poolRef.current = MOVES_POOL
+  useEffect(() => {
+    poolRef.current = MOVES_POOL
+  }, [MOVES_POOL])
+
   const charName     = isKaen ? 'Kaen' : 'Sable'
   const defeatTitle  = isKaen ? 'Kaen Falls' : 'Sable Falls'
   const victoryArt   = isKaen ? kaenVictory : sableVictory
@@ -98,6 +106,8 @@ export default function CombatScreen({ character, node, isDualSecond = false, ru
   const [playerST,      setPlayerST]      = useState(5)
   const [playerPosture, setPlayerPosture] = useState(0)
   const [playerStaggered, setPlayerStaggered] = useState(false)
+  const [showFleeConfirm, setShowFleeConfirm] = useState(false)
+  const [showSettings,    setShowSettings]    = useState(false)
 
   // ─── ENEMY STATE ───────────────────────────────────────────
   const [enemyHP,       setEnemyHP]       = useState(80)
@@ -434,6 +444,13 @@ export default function CombatScreen({ character, node, isDualSecond = false, ru
     }
   }, [phase, isDualFirst]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ─── NOTIFY PARENT: entering Victory/Defeat screen ───────────
+  // Music resumes on these screens, stays silent during active fighting
+  useEffect(() => {
+    const showingEndScreen = (phase === 'won' && !isDualFirst) || phase === 'lost'
+    onCombatEndPhaseChange?.(showingEndScreen)
+  }, [phase, isDualFirst]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // ─── VICTORY SCREEN ────────────────────────────────────────
   if (phase === 'won') {
     // Dual-remnant first phase — no victory screen, transition handled by effect above
@@ -487,13 +504,46 @@ export default function CombatScreen({ character, node, isDualSecond = false, ru
       <div className="combat-overlay" />
 
       {/* Fixed screen-edge controls */}
-      <button className="combat-side-btn combat-flee-corner" onClick={() => onFlee?.()}>
+      <button className="combat-side-btn combat-flee-corner" onClick={() => setShowFleeConfirm(true)}>
         ⚔ Flee
       </button>
-      <div className="combat-side-controls">
-        <button className="combat-side-btn" onClick={() => onFlee?.()}>⚙ Settings</button>
-        <button className="combat-side-btn" onClick={() => onFlee?.()}>✦ Map</button>
-      </div>
+      <button
+        className="settings-icon-circular"
+        onClick={() => setShowSettings(true)}
+        aria-label="Settings"
+      >
+        ⚙
+      </button>
+
+      {/* Flee confirmation */}
+      {showFleeConfirm && (
+        <div className="combat-confirm-backdrop" onClick={() => setShowFleeConfirm(false)}>
+          <div className="combat-confirm-box" onClick={e => e.stopPropagation()}>
+            <p className="combat-confirm-text">
+              Fleeing counts as a loss. No reward will be given.
+            </p>
+            <div className="combat-confirm-btns">
+              <button className="combat-confirm-cancel" onClick={() => setShowFleeConfirm(false)}>
+                Stay and Fight
+              </button>
+              <button
+                className="combat-confirm-flee"
+                onClick={() => {
+                  setShowFleeConfirm(false)
+                  onLose?.(node)
+                }}
+              >
+                Flee
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Settings modal */}
+      {showSettings && (
+        <SettingsModal onClose={() => setShowSettings(false)} onMusicVolumeChange={onMusicVolumeChange} />
+      )}
 
       <div className="combat-content">
 
@@ -603,10 +653,6 @@ export default function CombatScreen({ character, node, isDualSecond = false, ru
                 (move.special === 'exploit'    && !enemyStaggered) ||
                 (move.special === 'jugular'    && !enemyStaggered) ||
                 (move.special === 'slitthroat' && !evading)
-              const lockedMsg =
-                (move.special === 'slitthroat')
-                  ? 'Use Vanish first to unlock'
-                  : 'Break the enemy\'s posture to unlock'
               const disabled = notAffordable || locked
               const showPopup = lockedPopup === move.name
               return (

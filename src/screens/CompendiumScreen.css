@@ -1,0 +1,446 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap');
+
+.compendium {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  font-family: 'Cinzel', serif;
+  overflow-y: auto;
+  padding: 40px 20px;
+}
+
+.compendium-bg {
+  position: fixed;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.4);
+  z-index: -2;
+}
+
+.compendium-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(26,18,5,0.5) 0%, rgba(6,8,15,0.88) 60%);
+  z-index: -1;
+}
+
+.compendium-content {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.compendium-header {
+  text-align: center;
+}
+
+.compendium-eyebrow {
+  font-size: 0.8rem;
+  letter-spacing: 0.4em;
+  color: #b8902a;
+  text-transform: uppercase;
+  text-shadow: 0 0 20px rgba(0,0,0,0.9);
+}
+
+.compendium-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #c8a030;
+  letter-spacing: 0.08em;
+  margin-top: 6px;
+}
+
+/* ── TABS ── */
+.compendium-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.compendium-tab {
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #7a6a40;
+  background: rgba(10,8,4,0.6);
+  border: 1px solid #2a2010;
+  border-radius: 4px;
+  padding: 9px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.compendium-tab:hover {
+  color: #b08a48;
+  border-color: #4a3818;
+}
+
+.compendium-tab.active {
+  color: #f0d878;
+  border-color: #c8a030;
+  background: rgba(200,160,48,0.1);
+}
+
+/* ── BODY ── */
+.compendium-body {
+  width: 100%;
+  background: rgba(8,9,15,0.55);
+  border: 1px solid #2a2010;
+  border-radius: 10px;
+  padding: 28px 24px;
+  min-height: 300px;
+}
+
+.comp-section {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.comp-entry-heading {
+  font-family: 'Cinzel', serif;
+  font-size: 1.05rem;
+  color: #c8a030;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+
+.comp-entry-text {
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.92rem;
+  color: #b09866;
+  line-height: 1.7;
+}
+
+.comp-entry-text--lore {
+  font-style: italic;
+  color: #b09050;
+}
+
+.comp-world-narrative {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.comp-world-para {
+  font-size: 0.95rem;
+  line-height: 1.85;
+}
+
+/* ── CHARACTERS TAB ── */
+.comp-char-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.comp-char-card {
+  display: flex;
+  gap: 20px;
+}
+
+.comp-char-img {
+  width: 240px;
+  height: 320px;
+  object-fit: cover;
+  object-position: center top;
+  border-radius: 8px;
+  border: 1px solid #3a2a10;
+  flex-shrink: 0;
+}
+
+.comp-char-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.comp-char-name {
+  font-size: 1.2rem;
+  color: #c8a030;
+}
+
+.comp-char-title {
+  font-size: 0.78rem;
+  color: #9a7840;
+  font-style: italic;
+  margin-bottom: 4px;
+}
+
+/* ── BESTIARY TAB ── */
+.comp-bestiary-entry {
+  border-bottom: 1px solid #2a2010;
+  padding-bottom: 20px;
+}
+
+.comp-bestiary-entry:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.comp-bestiary-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.comp-bestiary-tier {
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8a6a3a;
+  border: 1px solid #4a3818;
+  border-radius: 4px;
+  padding: 3px 8px;
+}
+
+.comp-bestiary-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.comp-bestiary-field-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #8a6a3a;
+  margin-bottom: 4px;
+}
+
+.comp-bestiary-lines {
+  margin-top: 18px;
+  padding-left: 14px;
+  border-left: 2px solid #2a2010;
+}
+
+.comp-bestiary-lines-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #7a6a40;
+  margin-bottom: 6px;
+}
+
+.comp-bestiary-line {
+  font-family: 'Crimson Pro', serif;
+  font-style: italic;
+  font-size: 0.85rem;
+  color: #9a8862;
+  line-height: 1.6;
+}
+
+/* ── CARDS TAB ── */
+.comp-char-filter {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.comp-filter-btn {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: #7a6a40;
+  background: rgba(10,8,4,0.6);
+  border: 1px solid #2a2010;
+  border-radius: 4px;
+  padding: 8px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.comp-filter-btn.active {
+  color: #f0d878;
+  border-color: #c8a030;
+  background: rgba(200,160,48,0.1);
+}
+
+.comp-cards-note {
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.78rem;
+  font-style: italic;
+  color: #7a6a50;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.comp-cards-group-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #8a6a3a;
+  margin: 16px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.comp-cards-group-count {
+  font-family: 'Crimson Pro', serif;
+  font-style: italic;
+  font-size: 0.7rem;
+  letter-spacing: normal;
+  text-transform: none;
+  color: #6a5a38;
+}
+
+.comp-card-tile--locked {
+  opacity: 0.55;
+  border-style: dashed;
+}
+
+.comp-card-name--locked {
+  color: #5a5048;
+  letter-spacing: 0.2em;
+}
+
+.comp-card-desc--locked {
+  color: #6a6058;
+  font-style: italic;
+}
+
+.comp-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.comp-card-tile {
+  background: rgba(14,16,22,0.7);
+  border: 1px solid #2a2010;
+  border-radius: 6px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.comp-card-tile--reward {
+  border-color: #3a2a14;
+}
+
+.comp-card-name {
+  font-family: 'Cinzel', serif;
+  font-size: 0.8rem;
+  color: #c8a030;
+}
+
+.comp-card-desc {
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.78rem;
+  color: #9a8862;
+  font-style: italic;
+}
+
+.comp-card-cost {
+  font-size: 0.65rem;
+  color: #7a9a40;
+  margin-top: 2px;
+}
+
+/* ── SYNERGIES TAB ── */
+.comp-synergy {
+  margin-bottom: 16px;
+  padding-left: 14px;
+  border-left: 2px solid #3a2a14;
+}
+
+.comp-synergy-combo {
+  font-family: 'Cinzel', serif;
+  font-size: 0.88rem;
+  color: #c8a030;
+  margin-bottom: 4px;
+}
+
+.comp-synergy-why {
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.85rem;
+  color: #9a8862;
+  font-style: italic;
+  line-height: 1.6;
+}
+
+/* ── BACK BUTTON ── */
+.compendium-nav-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 480px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.compendium-back-btn {
+  flex: 1;
+  font-family: 'Cinzel', serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  color: #8a6a3a;
+  background: rgba(10,8,4,0.85);
+  border: 1px solid #3a2a14;
+  border-radius: 6px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.compendium-back-btn:hover {
+  border-color: #5a4020;
+  color: #b08a48;
+}
+
+.compendium-next-btn {
+  flex: 1;
+  font-family: 'Cinzel', serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  color: #f0d878;
+  background: rgba(10,8,4,0.9);
+  border: 1px solid #c8a030;
+  border-radius: 6px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.compendium-next-btn:hover {
+  background: rgba(200,160,48,0.15);
+  box-shadow: 0 0 20px rgba(200,160,48,0.25);
+}
+
+@media (max-width: 500px) {
+  .compendium-nav-row {
+    flex-direction: column;
+  }
+}
+
+/* ── MOBILE ── */
+@media (max-width: 600px) {
+  .comp-char-card {
+    flex-direction: column;
+  }
+  .comp-char-img {
+    width: 100%;
+    height: 280px;
+  }
+  .compendium-tabs {
+    gap: 6px;
+  }
+  .compendium-tab {
+    font-size: 0.62rem;
+    padding: 7px 12px;
+  }
+}

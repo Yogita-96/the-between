@@ -662,3 +662,75 @@
   inset: 0;
   z-index: 9998;
 }
+
+.combat-confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(4,5,8,0.82);
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.combat-confirm-box {
+  background: rgba(10,8,4,0.96);
+  border: 1px solid #5a2a2a;
+  border-radius: 10px;
+  padding: 28px 26px;
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.combat-confirm-text {
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.95rem;
+  font-style: italic;
+  color: #c8a8a8;
+  line-height: 1.6;
+}
+
+.combat-confirm-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.combat-confirm-cancel {
+  font-family: 'Cinzel', serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  color: #c8a030;
+  background: rgba(200,160,48,0.08);
+  border: 1px solid #c8a030;
+  border-radius: 6px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.combat-confirm-cancel:hover {
+  background: rgba(200,160,48,0.15);
+}
+
+.combat-confirm-flee {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: #c87060;
+  background: transparent;
+  border: 1px solid #5a2a2a;
+  border-radius: 6px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.combat-confirm-flee:hover {
+  background: rgba(160,60,40,0.1);
+  color: #e89070;
+}
