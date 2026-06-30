@@ -6,8 +6,9 @@ import sableImg from '../assets/sable.png'
 import sableProfile from '../assets/sable-sideprofile.png'
 import sableAction from '../assets/sable-action.png'
 import betweenBg from '../assets/the-between-bg.png'
+import bgMusic from '../assets/audio/the-between-music.mp3'
+import clickSfx from '../assets/audio/click-basic.wav'
 import './CharSelectScreen.css'
-
 
 const CHARACTERS = [
   {
@@ -21,29 +22,74 @@ const CHARACTERS = [
     stats: { hp: 100, stamina: 5, agility: 2 },
     moves: [
       { name: 'Greatsword Strike', desc: '20 dmg, posture +15', cost: '3 ST' },
-      { name: 'Shield Bash', desc: '8 dmg, posture +25', cost: '2 ST' },
-      { name: 'Endure', desc: 'Absorb next hit, counter bonus', cost: '1 ST' },
-      { name: 'Ruin Strike', desc: 'More dmg at low HP', cost: '4 ST' },
+      { name: 'Shield Bash',       desc: '8 dmg, posture +25',  cost: '2 ST' },
+      { name: 'Endure',            desc: 'Absorb next hit, counter bonus', cost: '1 ST' },
+      { name: 'Ruin Strike',       desc: 'More dmg at low HP',  cost: '4 ST' },
     ],
   },
   {
-  id: 'sable',
-  name: 'Sable',
-  title: 'The Unseen',
-  role: 'Precision Assassin',
-  lore: 'She speaks rarely. When she does, it sounds like she is reading from something written a long time ago.',
-  image: sableImg,
-  images: [sableImg, sableProfile, sableAction],
-  stats: { hp: 65, stamina: 5, agility: 5 },
-  moves: [
-    { name: 'Twin Strike', desc: '2×8 dmg, posture +8', cost: '2 ST' },
-    { name: 'Crossbow', desc: '20 dmg, ignores guard', cost: '2 ST' },
-    { name: 'Shadow Step', desc: 'Reposition, next ×2 dmg', cost: '1 ST' },
-    { name: 'Throat Strike', desc: '25 dmg, hides Intent', cost: '3 ST' },
-  ],
-},
+    id: 'sable',
+    name: 'Sable',
+    title: 'The Unseen',
+    role: 'Precision Assassin',
+    lore: 'She speaks rarely. When she does, it sounds like she is reading from something written a long time ago.',
+    image: sableImg,
+    images: [sableImg, sableProfile, sableAction],
+    stats: { hp: 65, stamina: 5, agility: 5 },
+    moves: [
+      { name: 'Twin Strike',   desc: '2×8 dmg, posture +8',   cost: '2 ST' },
+      { name: 'Crossbow',      desc: '20 dmg, ignores guard',  cost: '2 ST' },
+      { name: 'Shadow Step',   desc: 'Reposition, next ×2 dmg', cost: '1 ST' },
+      { name: 'Throat Strike', desc: '25 dmg, hides Intent',   cost: '3 ST' },
+    ],
+  },
 ]
 
+// ─── AUDIO HELPERS ────────────────────────────────────────────
+function useAmbientMusic(src) {
+  const audioRef = useRef(null)
+
+  useEffect(() => {
+    const audio = new Audio(src)
+    audio.loop = true
+    audio.volume = 0
+    audioRef.current = audio
+
+    // Fade in over 2s
+    audio.play().catch(() => {}) // browsers may block autoplay — silently ignore
+    let vol = 0
+    const fade = setInterval(() => {
+      vol = Math.min(vol + 0.02, 0.45)
+      audio.volume = vol
+      if (vol >= 0.45) clearInterval(fade)
+    }, 80)
+
+    return () => {
+      clearInterval(fade)
+      // Fade out on unmount
+      let v = audio.volume
+      const fadeOut = setInterval(() => {
+        v = Math.max(v - 0.03, 0)
+        audio.volume = v
+        if (v <= 0) {
+          clearInterval(fadeOut)
+          audio.pause()
+          audio.src = ''
+        }
+      }, 60)
+    }
+  }, [src])
+
+  return audioRef
+}
+
+function playClick() {
+  const sfx = new Audio(clickSfx)
+  sfx.volume = 0.35
+  sfx.play().catch(() => {})
+}
+
+// ─── STAT BAR ─────────────────────────────────────────────────
 function StatBar({ value, max, color }) {
   const pct = (value / max) * 100
   return (
@@ -53,14 +99,13 @@ function StatBar({ value, max, color }) {
   )
 }
 
-function CharPortrait({ char, isActive }) {
+// ─── CHARACTER PORTRAIT ───────────────────────────────────────
+function CharPortrait({ char, isActive, onDotClick }) {
   const [imgIndex, setImgIndex] = useState(0)
   const prevActiveRef = useRef(isActive)
 
   useEffect(() => {
-    if (!isActive && prevActiveRef.current) {
-      setImgIndex(0)
-    }
+    if (!isActive && prevActiveRef.current) setImgIndex(0)
     prevActiveRef.current = isActive
   }, [isActive])
 
@@ -72,15 +117,13 @@ function CharPortrait({ char, isActive }) {
     return () => clearInterval(timer)
   }, [isActive, char.images.length])
 
-
-
   return (
     <div className="char-portrait-wrap">
       <img
         key={`${char.id}-${imgIndex}`}
         src={char.images[imgIndex]}
         alt={char.name}
-         className="char-portrait-img"
+        className="char-portrait-img"
       />
       <div className="char-portrait-fade" />
       {isActive && (
@@ -89,7 +132,12 @@ function CharPortrait({ char, isActive }) {
             <div
               key={i}
               className={`char-img-dot ${i === imgIndex ? 'active' : ''}`}
-              onClick={e => { e.stopPropagation(); setImgIndex(i) }}
+              onClick={e => {
+                e.stopPropagation()
+                playClick()
+                setImgIndex(i)
+                onDotClick?.()
+              }}
             />
           ))}
         </div>
@@ -98,9 +146,12 @@ function CharPortrait({ char, isActive }) {
   )
 }
 
+// ─── MAIN SCREEN ──────────────────────────────────────────────
 export default function CharSelectScreen({ onSelect }) {
   const [selected, setSelected] = useState(null)
   const [hovering, setHovering] = useState(null)
+
+  useAmbientMusic(bgMusic)
 
   return (
     <div className="charselect">
@@ -125,7 +176,10 @@ export default function CharSelectScreen({ onSelect }) {
                 className={`char-card ${selected?.id === char.id ? 'selected' : ''}`}
                 onMouseEnter={() => setHovering(char)}
                 onMouseLeave={() => setHovering(null)}
-                onClick={() => setSelected(char)}
+                onClick={() => {
+                  playClick()
+                  setSelected(char)
+                }}
               >
                 <CharPortrait char={char} isActive={isActive} />
 
@@ -176,7 +230,12 @@ export default function CharSelectScreen({ onSelect }) {
 
         <button
           className={`charselect-btn ${selected ? 'ready' : 'disabled'}`}
-          onClick={() => selected && onSelect(selected)}
+          onClick={() => {
+            if (selected) {
+              playClick()
+              onSelect(selected)
+            }
+          }}
           disabled={!selected}
         >
           {selected ? `Enter as ${selected.name}` : 'Select a character'}

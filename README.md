@@ -93,6 +93,10 @@ This project is an original work in progress and is not open for public use, red
 
 **Original character and world art** generated using AI tools (ChatGPT/DALL-E) and are exclusive to this project.
 
+**Music**
+Music by Douglas Gustafson from Pixabay
+https://pixabay.com/users/psychronic-13092015/
+
 **World concept, characters, lore, and game design** — The Between, Kaen, Sable, The Remnant, The Unfinished, and The Cartographer — are original creations by Yogita M.
 
 © 2026 Yogita M. All rights reserved.
