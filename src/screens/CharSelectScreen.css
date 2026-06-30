@@ -37,9 +37,10 @@
   gap: 16px;
 }
 
+/* ── HEADER — increased size for legibility on compressed video ── */
 .charselect-eyebrow {
   font-family: 'Cinzel', serif;
-  font-size: 0.75rem;
+  font-size: 1rem;
   letter-spacing: 0.4em;
   color: #b8902a;
   text-transform: uppercase;
@@ -116,7 +117,6 @@
   object-position: center center;
   transition: transform 0.4s ease;
 }
-
 
 .char-card:hover .char-portrait-img {
   transform: scale(1.03);
@@ -244,68 +244,79 @@
   flex-shrink: 0;
 }
 
+/* ── SIGNATURE MOVES — sized up, more breathing room ── */
 .char-moves {
   border-top: 1px solid #2a2010;
-  padding-top: 12px;
+  padding-top: 14px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 9px;
+}
+
+.char-moves-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #9a7840;
+  margin-bottom: 4px;
 }
 
 .char-move {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 8px;
+  gap: 10px;
 }
 
 .char-move-name {
   font-family: 'Cinzel', serif;
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   color: #c8a030;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   flex-shrink: 0;
 }
 
 .char-move-desc {
-  font-size: 0.68rem;
-  color: #9a7840;
+  font-size: 0.85rem;
+  color: #a88848;
   text-align: right;
 }
 
+/* ── SELECT BUTTON — darker background, thicker border ── */
 .charselect-btn {
   font-family: 'Cinzel', serif;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   letter-spacing: 0.15em;
   border-radius: 6px;
-  padding: 14px 48px;
+  padding: 15px 50px;
   cursor: pointer;
   text-transform: uppercase;
   transition: all 0.3s ease;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 .charselect-btn.disabled {
-  color: #6a5030;
-  border: 1px solid #3a2a10;
-  background: transparent;
+  color: #8a6a3a;
+  border: 2px solid #4a3818;
+  background: rgba(10, 8, 4, 0.85);
   cursor: not-allowed;
 }
 
 .charselect-btn.disabled:hover {
-  color: #9a7040;
-  border-color: #5a4020;
+  color: #b08a48;
+  border-color: #6a5022;
 }
 
 .charselect-btn.ready {
-  color: #c8a030;
-  border: 1px solid #c8a030;
-  background: rgba(200, 160, 48, 0.08);
+  color: #f0d878;
+  border: 2px solid #c8a030;
+  background: rgba(10, 8, 4, 0.9);
 }
 
 .charselect-btn.ready:hover {
-  background: rgba(200, 160, 48, 0.15);
-  box-shadow: 0 0 20px rgba(200, 160, 48, 0.2);
+  background: rgba(200, 160, 48, 0.18);
+  box-shadow: 0 0 24px rgba(200, 160, 48, 0.3);
 }
 
 @media (max-width: 768px) {

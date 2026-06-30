@@ -21,10 +21,10 @@ const CHARACTERS = [
     images: [kaenImg, kaenProfile1, kaenAction],
     stats: { hp: 100, stamina: 5, agility: 2 },
     moves: [
-      { name: 'Greatsword Strike', desc: '20 dmg, posture +15', cost: '3 ST' },
-      { name: 'Shield Bash',       desc: '8 dmg, posture +25',  cost: '2 ST' },
-      { name: 'Endure',            desc: 'Absorb next hit, counter bonus', cost: '1 ST' },
-      { name: 'Ruin Strike',       desc: 'More dmg at low HP',  cost: '4 ST' },
+      { name: 'Greatsword Strike', desc: '20 dmg · posture +12', cost: '3 ST' },
+      { name: 'Shield Bash',       desc: '8 dmg · posture +18',  cost: '2 ST' },
+      { name: 'Endure',            desc: 'Block incoming · posture −30', cost: '1 ST' },
+      { name: 'Ruin Strike',       desc: 'Scales with missing HP', cost: '4 ST' },
     ],
   },
   {
@@ -37,10 +37,10 @@ const CHARACTERS = [
     images: [sableImg, sableProfile, sableAction],
     stats: { hp: 65, stamina: 5, agility: 5 },
     moves: [
-      { name: 'Twin Strike',   desc: '2×8 dmg, posture +8',   cost: '2 ST' },
-      { name: 'Crossbow',      desc: '20 dmg, ignores guard',  cost: '2 ST' },
-      { name: 'Shadow Step',   desc: 'Reposition, next ×2 dmg', cost: '1 ST' },
-      { name: 'Throat Strike', desc: '25 dmg, hides Intent',   cost: '3 ST' },
+      { name: 'Shadow Strike', desc: '18 dmg · fast and cheap',        cost: '2 ST' },
+      { name: 'Vanish',        desc: 'Sidestep — nullifies incoming hit', cost: '1 ST' },
+      { name: 'Exploit',       desc: '28 dmg · only when enemy staggered', cost: '3 ST' },
+      { name: 'Bleed Edge',    desc: '10 dmg · posture +14 · sets up stagger', cost: '2 ST' },
     ],
   },
 ]
@@ -215,6 +215,7 @@ export default function CharSelectScreen({ onSelect }) {
                   </div>
 
                   <div className="char-moves">
+                    <p className="char-moves-label">Signature Moves</p>
                     {char.moves.map((move) => (
                       <div key={move.name} className="char-move">
                         <span className="char-move-name">{move.name}</span>
