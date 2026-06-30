@@ -97,14 +97,14 @@ This project is an original work in progress and is not open for public use, red
 Music by Douglas Gustafson from Pixabay
 https://pixabay.com/users/psychronic-13092015/
 
-**World concept, characters, lore, and game design** — The Between, Kaen, Sable, The Remnant, The Unfinished, and The Cartographer — are original creations by Yogita M.
+**World concept, characters, lore, and game design** — The Between, Kaen, Sable, The Remnant, The Unfinished, and The Cartographer — are original creations by Yogita Builds.
 
-© 2026 Yogita M. All rights reserved.
+© 2026 Yogita Builds. All rights reserved.
 
 ---
 
 ## About
 
-Built by [Yogita M.](https://www.linkedin.com/in/yogita-m/) — Frontend developer documenting the build on [Medium](https://medium.com/@yogita27496) and [LinkedIn](https://www.linkedin.com/in/yogita-m/).
+Built by [Yogita Builds](https://www.linkedin.com/in/yogita-m/) — Frontend developer documenting the build on [Medium](https://medium.com/@yogita27496) and [LinkedIn](https://www.linkedin.com/in/yogita-m/).
 
 _No game engine. Just state management taken seriously._
