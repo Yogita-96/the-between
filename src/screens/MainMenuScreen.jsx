@@ -4,8 +4,21 @@ import { playClick } from '../utils/audio'
 import SettingsModal from '../components/SettingsModal'
 import './MainMenuScreen.css'
 
-export default function MainMenuScreen({ onBegin, onCompendium, onCredits, onMusicVolumeChange }) {
-  const [showSettings, setShowSettings] = useState(false)
+export default function MainMenuScreen({
+  onBegin, onContinue, hasSavedRun,
+  onCompendium, onCredits, onMusicVolumeChange,
+}) {
+  const [showSettings,    setShowSettings]    = useState(false)
+  const [showNewRunConfirm, setShowNewRunConfirm] = useState(false)
+
+  const handleBegin = () => {
+    playClick()
+    if (hasSavedRun) {
+      setShowNewRunConfirm(true)
+    } else {
+      onBegin()
+    }
+  }
 
   return (
     <div className="mainmenu">
@@ -24,8 +37,19 @@ export default function MainMenuScreen({ onBegin, onCompendium, onCredits, onMus
         <p className="mainmenu-eyebrow">✦ The Between ✦</p>
 
         <div className="mainmenu-buttons">
-          <button className="mainmenu-btn mainmenu-btn--primary" onClick={() => { playClick(); onBegin() }}>
-            Begin Your Path
+          {hasSavedRun && (
+            <button
+              className="mainmenu-btn mainmenu-btn--primary"
+              onClick={() => { playClick(); onContinue() }}
+            >
+              Continue
+            </button>
+          )}
+          <button
+            className={`mainmenu-btn ${!hasSavedRun ? 'mainmenu-btn--primary' : ''}`}
+            onClick={handleBegin}
+          >
+            {hasSavedRun ? 'New Run' : 'Begin Your Path'}
           </button>
           <button className="mainmenu-btn" onClick={() => { playClick(); onCompendium() }}>
             Compendium
@@ -41,6 +65,33 @@ export default function MainMenuScreen({ onBegin, onCompendium, onCredits, onMus
           onClose={() => setShowSettings(false)}
           onMusicVolumeChange={onMusicVolumeChange}
         />
+      )}
+
+      {showNewRunConfirm && (
+        <div className="mainmenu-confirm-backdrop" onClick={() => setShowNewRunConfirm(false)}>
+          <div className="mainmenu-confirm-box" onClick={e => e.stopPropagation()}>
+            <p className="mainmenu-confirm-text">
+              Starting a new run will abandon your current progress. Are you sure?
+            </p>
+            <div className="mainmenu-confirm-btns">
+              <button
+                className="mainmenu-confirm-cancel"
+                onClick={() => setShowNewRunConfirm(false)}
+              >
+                Keep Current Run
+              </button>
+              <button
+                className="mainmenu-confirm-new"
+                onClick={() => {
+                  setShowNewRunConfirm(false)
+                  onBegin()
+                }}
+              >
+                Start New Run
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

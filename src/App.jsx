@@ -86,18 +86,55 @@ const MAP_NODES_REF = [
   { id: 5, floor: 3 },
 ]
 
+// ─── RUN PERSISTENCE ─────────────────────────────────────────
+// Saves run state to localStorage whenever player lands on map.
+// On load, checks for a saved run and offers Continue on Main Menu.
+// Does NOT save mid-combat (Option A) — fight restarts if closed.
+const RUN_SAVE_KEY = 'between-saved-run'
+
+function saveRun(data) {
+  try {
+    localStorage.setItem(RUN_SAVE_KEY, JSON.stringify({
+      ...data,
+      savedAt: Date.now(),
+    }))
+  } catch {
+    // localStorage unavailable — fail silently
+  }
+}
+
+function loadSavedRun() {
+  try {
+    const saved = localStorage.getItem(RUN_SAVE_KEY)
+    return saved ? JSON.parse(saved) : null
+  } catch {
+    return null
+  }
+}
+
+function clearSavedRun() {
+  try {
+    localStorage.removeItem(RUN_SAVE_KEY)
+  } catch {
+    // fail silently
+  }
+}
+
 function App() {
   const [screen,          setScreen]          = useState('title')
   const [selectedChar,    setSelectedChar]    = useState(null)
   const [completedNodes,  setCompletedNodes]  = useState([])
-  const [failedNodes,     setFailedNodes]     = useState([]) // nodes lost on at least once
+  const [failedNodes,     setFailedNodes]     = useState([])
   const [currentNode,     setCurrentNode]     = useState(null)
-  const [runDeck,         setRunDeck]         = useState([])  // grows with rewards during run
-  const [runHP,           setRunHP]           = useState(null) // HP carried between dual-remnant phases
-  const [runMaxHP,        setRunMaxHP]        = useState(null) // max HP boosted by stat rewards
-  const [dualPhase,       setDualPhase]       = useState('first') // 'first' | 'second'
+  const [runDeck,         setRunDeck]         = useState([])
+  const [runHP,           setRunHP]           = useState(null)
+  const [runMaxHP,        setRunMaxHP]        = useState(null)
+  const [dualPhase,       setDualPhase]       = useState('first')
   const [transitionMsg,   setTransitionMsg]   = useState('')
-  const [pendingReward,   setPendingReward]   = useState(null) // { floor, isElite } passed to RewardScreen
+  const [pendingReward,   setPendingReward]   = useState(null)
+
+  // ─── SAVED RUN CHECK ─────────────────────────────────────────
+  const [hasSavedRun, setHasSavedRun]       = useState(() => !!loadSavedRun())
 
   // ─── PERSISTENT CARD UNLOCKS ──────────────────────────────────
   // Card names the player has discovered across ALL runs, ever.
@@ -134,9 +171,29 @@ function App() {
   const shouldPlayMusic = MUSIC_SCREENS.includes(screen) || (inCombatScreen && combatEndPhase)
   const setMusicVolume = useAmbientMusic(bgMusic, shouldPlayMusic)
 
+  // ─── AUTO-SAVE RUN ON MAP ─────────────────────────────────────
+  // Saves whenever player lands on the map — covers win, loss retry,
+  // floor2Reset, and reward completion. Not saved mid-combat (Option A).
+  useEffect(() => {
+    if (screen === 'map' && selectedChar) {
+      saveRun({
+        selectedChar,
+        completedNodes,
+        failedNodes,
+        runDeck,
+        runHP,
+        runMaxHP,
+      })
+      // hasSavedRun is updated via the continueRun/clearSavedRun flow —
+      // no setState needed here since saveRun is an external system sync
+    }
+  }, [screen]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // ─── RESET HELPERS ───────────────────────────────────────────
 
   const fullReset = () => {
+    clearSavedRun()
+    setHasSavedRun(false)
     setCompletedNodes([])
     setFailedNodes([])
     setCurrentNode(null)
@@ -147,9 +204,9 @@ function App() {
     setScreen('charselect')
   }
 
-  // Same as fullReset but exits all the way to Title, not Char Select —
-  // used when the player explicitly quits a run from the Map screen
   const quitToTitle = () => {
+    clearSavedRun()
+    setHasSavedRun(false)
     setCompletedNodes([])
     setFailedNodes([])
     setCurrentNode(null)
@@ -162,7 +219,6 @@ function App() {
   }
 
   const floor2Reset = () => {
-    // Keep Floor 1 progress, wipe Floor 2
     setCompletedNodes(prev => prev.filter(id => {
       const node = MAP_NODES_REF.find(n => n.id === id)
       return node && node.floor === 1
@@ -174,10 +230,31 @@ function App() {
     setCurrentNode(null)
     setRunHP(null)
     setDualPhase('first')
+    goToMap()
+    // floor2Reset still has a valid run — save will fire on map arrival
+  }
+
+  // ─── CONTINUE RUN ────────────────────────────────────────────
+  // Loads a previously saved run from localStorage and resumes at Map
+  const continueRun = () => {
+    const saved = loadSavedRun()
+    if (!saved) return
+    setSelectedChar(saved.selectedChar)
+    setCompletedNodes(saved.completedNodes ?? [])
+    setFailedNodes(saved.failedNodes ?? [])
+    setRunDeck(saved.runDeck ?? [])
+    setRunHP(saved.runHP ?? null)
+    setRunMaxHP(saved.runMaxHP ?? null)
+    setDualPhase('first')
+    setCurrentNode(null)
     setScreen('map')
   }
 
-  // ─── ENTER COMBAT ────────────────────────────────────────────
+  // Helper to go to map and mark run as saved
+  const goToMap = () => {
+    setScreen('map')
+    setHasSavedRun(true)
+  }
   const handleEnterCombat = (node) => {
     setCurrentNode(node)
     setDualPhase('first')
@@ -215,7 +292,6 @@ function App() {
       node.floor === 3                         // Cartographer
 
     if (givesReward && node.floor !== 3) {
-      // Show reward screen before returning to map
       setPendingReward({
         floor: node.floor,
         isElite: node.type === 'elite',
@@ -223,9 +299,9 @@ function App() {
       setScreen('reward')
     } else if (node.floor === 3) {
       // Run complete — could show a special screen here later
-      setScreen('map')
+      goToMap()
     } else {
-      setScreen('map')
+      goToMap()
     }
   }
 
@@ -243,7 +319,7 @@ function App() {
     if (node?.id) setFailedNodes(prev => [...prev, node.id])
     setRunHP(null)
     setDualPhase('first')
-    setScreen('map')
+    goToMap()
   }
 
   // ─── REWARD CHOSEN ───────────────────────────────────────────
@@ -286,7 +362,7 @@ function App() {
     }
     // Skip or after applying — go to map
     setPendingReward(null)
-    setScreen('map')
+    goToMap()
   }
 
   // ─── CHARACTER WITH PERSISTED HP + DECK ──────────────────────
@@ -317,6 +393,8 @@ function App() {
       {screen === 'mainmenu' && (
         <MainMenuScreen
           onBegin={() => setScreen('charselect')}
+          onContinue={continueRun}
+          hasSavedRun={hasSavedRun}
           onCompendium={() => setScreen('compendium')}
           onCredits={() => setScreen('credits')}
           onMusicVolumeChange={setMusicVolume}
@@ -338,6 +416,8 @@ function App() {
       {screen === 'charselect' && (
         <CharSelectScreen
           onSelect={(char) => {
+            clearSavedRun()
+            setHasSavedRun(false)
             setSelectedChar(char)
             setRunHP(null)
             setRunMaxHP(null)

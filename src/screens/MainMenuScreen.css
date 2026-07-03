@@ -113,3 +113,77 @@
     letter-spacing: 0.35em;
   }
 }
+
+/* ── NEW RUN CONFIRMATION DIALOG ─────────────────────────── */
+.mainmenu-confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(4,5,8,0.82);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mainmenu-confirm-box {
+  background: rgba(10,8,4,0.96);
+  border: 1px solid #5a2a2a;
+  border-radius: 10px;
+  padding: 28px 26px;
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  font-family: 'Cinzel', serif;
+}
+
+.mainmenu-confirm-text {
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.95rem;
+  font-style: italic;
+  color: #c8a8a8;
+  line-height: 1.6;
+}
+
+.mainmenu-confirm-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mainmenu-confirm-cancel {
+  font-family: 'Cinzel', serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  color: #c8a030;
+  background: rgba(200,160,48,0.08);
+  border: 1px solid #c8a030;
+  border-radius: 6px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mainmenu-confirm-cancel:hover {
+  background: rgba(200,160,48,0.15);
+}
+
+.mainmenu-confirm-new {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: #c87060;
+  background: transparent;
+  border: 1px solid #5a2a2a;
+  border-radius: 6px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mainmenu-confirm-new:hover {
+  background: rgba(160,60,40,0.1);
+  color: #e89070;
+}

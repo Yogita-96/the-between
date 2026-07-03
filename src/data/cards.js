@@ -91,7 +91,7 @@ export const SABLE_BASE_POOL = [
   {
     name: 'Exploit',
     cost: 3, dmg: 28, posture: 0,
-    desc: '28 dmg · only when enemy staggered',
+    desc: '14 dmg · 28 if enemy staggered',
     special: 'exploit',
   },
   {
@@ -137,14 +137,20 @@ export const SABLE_BASE_POOL = [
   {
     name: 'Backstep',
     cost: 1, dmg: 0, posture: 0,
-    desc: 'Cheap reposition · own posture −10',
+    desc: 'Reposition · −8 dmg from next hit · own posture −10',
     special: 'backstep',
   },
   {
     name: 'Death Mark',
     cost: 3, dmg: 0, posture: 0,
-    desc: 'Next attack deals +10 dmg',
+    desc: 'Next attack deals +12 dmg · stacks',
     special: 'deathmark',
+  },
+  {
+    name: 'Expose',
+    cost: 2, dmg: 6, posture: 15,
+    desc: '6 dmg · cracks guard — enemy staggers easier for 2 turns',
+    special: 'expose',
   },
 ]
 
@@ -340,54 +346,59 @@ export function buildRewardOptions({ floor, isKaen, currentDeck }) {
   const rewardCards  = isKaen ? [] : SABLE_REWARD_CARDS
 
   const options = []
+  // Track everything already offered this screen so no option repeats.
+  const usedCardNames  = new Set()
+  const usedBoostTypes = new Set()
 
-  // ── 1. HP card for this floor (skip if already in deck) ──
-  const floorKey  = Math.min(floor, 3)
-  const hpCard    = hpByFloor[floorKey]
-  if (hpCard && !currentDeck.includes(hpCard.name)) {
-    options.push({ type: 'card', card: hpCard, label: hpCard.name, desc: hpCard.desc })
-  } else {
-    // Already have it — offer a Sable reward card or stat boost instead
-    const fallback = rewardCards.find(c => !currentDeck.includes(c.name))
-    if (fallback) {
-      options.push({ type: 'card', card: fallback, label: fallback.name, desc: fallback.desc })
-    } else {
-      const boost = statBoosts[Math.floor(Math.random() * statBoosts.length)]
-      options.push({ type: 'boost', boost, label: boost.label, desc: boost.desc })
-    }
+  const takeRewardCard = () => {
+    const avail = rewardCards.filter(
+      c => !currentDeck.includes(c.name) && !usedCardNames.has(c.name)
+    )
+    if (avail.length === 0) return null
+    const pick = avail[Math.floor(Math.random() * avail.length)]
+    usedCardNames.add(pick.name)
+    return { type: 'card', card: pick, label: pick.name, desc: pick.desc }
   }
 
-  // ── 2. Upgrade card ──
-  // On Floor 2+ also consider Sable reward cards as "new card" upgrade-tier options
-  if (floor >= 2 && !isKaen) {
-    const availableRewards = rewardCards.filter(c => !currentDeck.includes(c.name))
-    if (availableRewards.length > 0) {
-      const pick = availableRewards[Math.floor(Math.random() * availableRewards.length)]
-      options.push({ type: 'card', card: pick, label: pick.name, desc: pick.desc })
-    }
+  const takeBoost = () => {
+    const avail = statBoosts.filter(b => !usedBoostTypes.has(b.type))
+    const pool  = avail.length > 0 ? avail : statBoosts
+    const boost = pool[Math.floor(Math.random() * pool.length)]
+    usedBoostTypes.add(boost.type)
+    return { type: 'boost', boost, label: boost.label, desc: boost.desc }
+  }
+
+  // ── 1. HP card for this floor (skip if already in deck) ──
+  const floorKey = Math.min(floor, 3)
+  const hpCard   = hpByFloor[floorKey]
+  if (hpCard && !currentDeck.includes(hpCard.name)) {
+    usedCardNames.add(hpCard.name)
+    options.push({ type: 'card', card: hpCard, label: hpCard.name, desc: hpCard.desc })
   } else {
-    // Kaen or Floor 1 — standard upgrade
+    // Already have the HP card — offer a reward card, else a stat boost
+    options.push(takeRewardCard() ?? takeBoost())
+  }
+
+  // ── 2. Upgrade / reward card slot ──
+  if (floor >= 2 && !isKaen) {
+    // Sable Floor 2+ — offer a NEW reward card (excludes slot-1's pick)
+    options.push(takeRewardCard() ?? takeBoost())
+  } else {
+    // Kaen or Floor 1 — standard upgrade to an owned card
     const validUpgrades = upgradePool.filter(u => currentDeck.includes(u.targets))
     if (validUpgrades.length > 0) {
       const upgrade = validUpgrades[Math.floor(Math.random() * validUpgrades.length)]
       options.push({ type: 'upgrade', upgrade, label: upgrade.label, desc: `Permanently upgrades ${upgrade.targets}` })
     } else {
-      // No valid upgrades yet — give a stat boost
-      const boost = statBoosts[Math.floor(Math.random() * statBoosts.length)]
-      options.push({ type: 'boost', boost, label: boost.label, desc: boost.desc })
+      options.push(takeBoost())
     }
   }
 
-  // ── 3. Stat boost ──
-  const usedBoostTypes = new Set(options.filter(o => o.type === 'boost').map(o => o.boost?.type))
-  const availableBoosts = statBoosts.filter(b => !usedBoostTypes.has(b.type))
-  const boost = availableBoosts.length > 0
-    ? availableBoosts[Math.floor(Math.random() * availableBoosts.length)]
-    : statBoosts[0]
-  options.push({ type: 'boost', boost, label: boost.label, desc: boost.desc })
+  // ── 3. Stat boost (distinct from any boost already offered) ──
+  options.push(takeBoost())
 
   // Shuffle final order
-  const a = [...options]
+  const a = options.filter(Boolean)
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [a[i], a[j]] = [a[j], a[i]]
