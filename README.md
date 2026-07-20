@@ -51,13 +51,24 @@ Title Screen → Character Select → Map → Combat → Win/Lose
 
 ## Combat Mechanics
 
-Each combatant has three bars:
+Turn-based deckbuilder combat. Each fight is a duel of resources and reading intent.
 
-- **HP** — lose this, you die
-- **Stamina** — every action costs stamina, regenerates each turn
-- **Posture** — builds as hits land; at 100, the combatant is staggered and takes massive bonus damage
+**Three bars per combatant:**
 
-**Enemy Intent** — each turn the enemy telegraphs their next move so you can strategize. Some moves hide this.
+- **HP** — lose this, the run ends
+- **Stamina** — every card costs stamina to play. Partial regen each turn (up to 5 max), so what you spend now shapes next turn
+- **Posture** — pressure meter. Builds as hits land. At 100, that combatant is staggered — the next attack against them lands with heavy bonus damage
+
+**Cards** — you draw 4 per turn from your deck. Same hand never repeats twice in a row. Redraw once per turn for 2 stamina.
+
+**Enemy Intent** — each turn the enemy telegraphs what they'll do next. Some intents hide their true damage. The Cartographer's whole second phase is hidden.
+
+**Skip Turn** — when every card in hand is unplayable, a skip option appears. Passes your turn at a cost: posture damage and reduced stamina next turn. Character-specific penalties reinforce identity: Kaen's tank posture cracks under pressure, Sable's finesse rhythm breaks.
+
+**Character-specific mechanics:**
+
+- **Kaen's Resolve** — Sekiro-style. Damage scales with his own posture. The more pressure he's under, the harder he hits — but high posture means one hit from being staggered himself.
+- **Sable's Chains** — Vanish → Slit Throat, Death Mark → Exploit, Ghost Step → discounted next attack. Her whole kit rewards setup-into-payoff play.
 
 ---
 
@@ -75,15 +86,29 @@ Each combatant has three bars:
 
 ## Project Status
 
-🚧 **Work in progress** — actively building.
+🚧 **Work in progress** — actively expanding.
+
+**Shipped:**
 
 - ✅ Title screen
-- ✅ Character select
-- ✅ Map screen with floor progression
-- ⏳ Combat screen
-- ⏳ Win/lose summary
-- ⏳ Character carousel + victory transitions
-- ⏳ Custom node icons
+- ✅ Character select with 2 playable characters (Kaen, Sable)
+- ✅ Map screen with 3-floor progression
+- ✅ Full combat system (HP, Stamina, Posture, cards, redraw, skip turn)
+- ✅ 26 cards across both characters + 3 Sable reward cards
+- ✅ Card synergies and chain mechanics
+- ✅ 3 enemies: Remnant (standard), Unfinished (elite), Cartographer (boss with hidden phase 2)
+- ✅ Reward system (new cards, upgrades, stat boosts)
+- ✅ Victory / defeat screens with enemy-specific art and defeat lines
+- ✅ Compendium with world lore, character bios, bestiary, card index, synergies, how-to-play
+- ✅ Posture Pressure tutorial (one-time contextual hint)
+- ✅ Run persistence via localStorage
+- ✅ Turn-based combat pacing with damage floaters, HP shake, intent telegraphing
+
+**In progress:**
+
+- ⏳ Phase 2 game-feel polish (screen shake on stagger break, boss phase transitions)
+- ⏳ Mid-combat save/resume
+- ⏳ Additional floors and enemies (post-launch expansion)
 
 ---
 
@@ -93,9 +118,7 @@ This project is an original work in progress and is not open for public use, red
 
 **Original character and world art** generated using AI tools (ChatGPT/DALL-E) and are exclusive to this project.
 
-**Music**
-Music by Douglas Gustafson from Pixabay
-https://pixabay.com/users/psychronic-13092015/
+**Music** Music by Douglas Gustafson from Pixabay — track content ID 521614 <https://pixabay.com/users/psychronic-13092015/>
 
 **World concept, characters, lore, and game design** — The Between, Kaen, Sable, The Remnant, The Unfinished, and The Cartographer — are original creations by Yogita Builds.
 

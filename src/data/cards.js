@@ -9,67 +9,67 @@ export const KAEN_BASE_POOL = [
   {
     name: 'Greatsword Strike',
     cost: 3, dmg: 20, posture: 12,
-    desc: '20 dmg · posture +12',
+    desc: '20 dmg · enemy posture +12',
   },
   {
     name: 'Shield Bash',
     cost: 2, dmg: 8, posture: 18,
-    desc: '8 dmg · posture +18',
+    desc: '8 dmg · enemy posture +18',
   },
   {
     name: 'Endure',
     cost: 1, dmg: 0, posture: 0,
-    desc: 'Block incoming · posture −30',
+    desc: 'Blocks next incoming hit · recover 30 posture',
     special: 'endure',
   },
   {
     name: 'Ruin Strike',
     cost: 4, dmg: 16, posture: 8,
-    desc: 'Scales with missing HP',
+    desc: '16 dmg base · scales up with your missing HP',
     special: 'ruin',
   },
   {
     name: 'Cleave',
     cost: 3, dmg: 14, posture: 10,
-    desc: '14 dmg · cuts through guard',
+    desc: '14 dmg · enemy posture +10',
   },
   {
     name: 'Rally',
     cost: 2, dmg: 0, posture: 0,
-    desc: 'Plant and breathe · posture −40',
+    desc: 'Recover 40 posture · no attack',
     special: 'rally',
   },
   {
     name: 'Advance',
     cost: 1, dmg: 6, posture: 8,
-    desc: '6 dmg · posture +8 · efficient',
+    desc: '6 dmg · enemy posture +8',
   },
   {
     name: 'Shatter',
     cost: 5, dmg: 10, posture: 35,
-    desc: '10 dmg · posture +35 · break focused',
+    desc: '10 dmg · enemy posture +35',
   },
   // ── 4 new cards ──
   {
     name: 'Iron Will',
     cost: 2, dmg: 0, posture: 0,
-    desc: 'Hold ground · posture −25',
+    desc: 'Recover 25 posture · no attack',
     special: 'ironwill',
   },
   {
     name: 'Crushing Blow',
     cost: 3, dmg: 18, posture: 15,
-    desc: '18 dmg · posture +15 · heavy and slow',
+    desc: '18 dmg · enemy posture +15',
   },
   {
     name: 'Guard Break',
     cost: 2, dmg: 6, posture: 22,
-    desc: '6 dmg · posture +22 · break focused',
+    desc: '6 dmg · enemy posture +22',
   },
   {
     name: 'Retaliate',
     cost: 3, dmg: 12, posture: 10,
-    desc: '12 dmg · bonus dmg if hit last turn',
+    desc: '12 dmg · +8 dmg if you were hit last turn',
     special: 'retaliate',
   },
 ]
@@ -80,12 +80,12 @@ export const SABLE_BASE_POOL = [
   {
     name: 'Shadow Strike',
     cost: 2, dmg: 18, posture: 6,
-    desc: '18 dmg · fast and cheap',
+    desc: '18 dmg · enemy posture +6',
   },
   {
     name: 'Vanish',
     cost: 1, dmg: 0, posture: 0,
-    desc: 'Sidestep — nullifies incoming hit',
+    desc: 'Evade the next incoming hit',
     special: 'vanish',
   },
   {
@@ -97,47 +97,47 @@ export const SABLE_BASE_POOL = [
   {
     name: 'Bleed Edge',
     cost: 2, dmg: 10, posture: 14,
-    desc: '10 dmg · posture +14 · sets up stagger',
+    desc: '10 dmg · enemy posture +14 · sets up stagger',
   },
   {
     name: 'Feint',
     cost: 1, dmg: 4, posture: 0,
-    desc: '4 dmg · own posture −20',
+    desc: '4 dmg · recover 20 posture',
     special: 'feint',
   },
   {
     name: 'Twin Fangs',
     cost: 4, dmg: 0, posture: 8,
-    desc: '2 × 12 dmg · each stagger-checks',
+    desc: '2 × 12 dmg · each rolls stagger bonus separately',
     special: 'twin',
   },
   {
     name: 'Ghost Step',
     cost: 2, dmg: 0, posture: 0,
-    desc: 'No dmg · own posture −15',
+    desc: 'Recover 15 posture · your next attack costs −1 ST',
     special: 'ghost',
   },
   {
     name: 'Rupture',
     cost: 3, dmg: 14, posture: 20,
-    desc: '14 dmg · posture +20 · commits to break',
+    desc: '14 dmg · enemy posture +20',
   },
   // ── 4 new cards ──
   {
     name: 'Shadowmeld',
     cost: 1, dmg: 0, posture: 0,
-    desc: 'Go still · own posture −20',
+    desc: 'Recover 20 posture · no attack',
     special: 'shadowmeld',
   },
   {
     name: 'Puncture',
     cost: 2, dmg: 12, posture: 10,
-    desc: '12 dmg · posture +10 · reliable mid',
+    desc: '12 dmg · enemy posture +10',
   },
   {
     name: 'Backstep',
     cost: 1, dmg: 0, posture: 0,
-    desc: 'Reposition · −8 dmg from next hit · own posture −10',
+    desc: 'Reposition · Recover 10 posture · next incoming hit deals −8 dmg',
     special: 'backstep',
   },
   {
@@ -149,7 +149,7 @@ export const SABLE_BASE_POOL = [
   {
     name: 'Expose',
     cost: 2, dmg: 6, posture: 15,
-    desc: '6 dmg · cracks guard — enemy staggers easier for 2 turns',
+    desc: '6 dmg · cracks guard — enemy stagger threshold lowered for 2 turns',
     special: 'expose',
   },
 ]
@@ -166,7 +166,7 @@ export const KAEN_HP_CARDS = [
   {
     name: 'Dig In',
     cost: 1, dmg: 0, posture: 0,
-    desc: 'Restore 10 HP · posture −20',
+    desc: 'Restore 10 HP · recover 20 posture',
     special: 'heal',
     healAmt: 10,
     postureRelief: 20,
@@ -174,7 +174,7 @@ export const KAEN_HP_CARDS = [
   {
     name: 'Fortify',
     cost: 3, dmg: 0, posture: 0,
-    desc: 'Restore 20 HP · posture −10',
+    desc: 'Restore 20 HP · recover 10 posture',
     special: 'heal',
     healAmt: 20,
     postureRelief: 10,
@@ -192,7 +192,7 @@ export const SABLE_HP_CARDS = [
   {
     name: 'Still',
     cost: 2, dmg: 0, posture: 0,
-    desc: 'Restore 12 HP · posture −30',
+    desc: 'Restore 12 HP · recover 30 posture',
     special: 'heal',
     healAmt: 12,
     postureRelief: 30,
@@ -260,7 +260,7 @@ export const SABLE_REWARD_CARDS = [
   {
     name: 'Hemorrhage',
     cost: 2, dmg: 8, posture: 14,
-    desc: '8 dmg now · bleeds 8 dmg next turn',
+    desc: '8 dmg now · enemy bleeds 8 dmg next turn',
     special: 'hemorrhage',
   },
   {

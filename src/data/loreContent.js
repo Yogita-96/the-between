@@ -104,11 +104,11 @@ export const HOW_TO_PLAY = [
   },
   {
     heading: 'Stamina (ST)',
-    text: 'Every card costs Stamina to play. You restore to full Stamina at the start of each turn, so spend freely — but plan your hand around what you can actually afford.',
+    text: 'Every card costs Stamina to play. You regenerate 3 Stamina at the start of each turn (up to a maximum of 5), so what you spend this turn shapes what you can afford next. Save some for the fights you cannot see coming.',
   },
   {
     heading: 'Posture',
-    text: 'Both you and your enemy have a posture bar. Landing hits builds the enemy\'s posture; taking hits builds yours. When a posture bar fills completely, that combatant staggers — open to a devastating follow-up strike.',
+    text: 'Both you and your enemy have a posture bar. Landing hits builds enemy posture; taking hits builds yours. When a posture bar fills to 100, that combatant staggers — the enemy\'s next hit deals +50% damage while you are exposed, and if you stagger, the next incoming attack lands unguarded for 25 damage. Cards like Rally, Endure, Backstep, and Shadowmeld recover your posture before it breaks.',
   },
   {
     heading: 'Enemy Intent',
@@ -130,7 +130,12 @@ export const HOW_TO_PLAY = [
     heading: 'Fleeing',
     text: 'You may flee a fight at any time, but the Between does not forgive an unfinished battle gently — fleeing counts as a loss, with no reward, exactly as if you had been defeated.',
   },
+  {
+    heading: 'Skip Turn',
+    text: 'If every card in your hand is unplayable — locked behind a condition, or too expensive for your current Stamina — a Skip Turn button appears. You may pass the turn, but at a cost: Kaen loses 20 posture, Sable loses 10, and both take a Stamina penalty on the following turn. Use it only when the hand refuses you.',
+  },
 ]
+
 
 export const SYNERGIES = {
   kaen: [
@@ -150,15 +155,19 @@ export const SYNERGIES = {
   sable: [
     {
       combo: 'Bleed Edge → Exploit',
-      why: 'Bleed Edge builds enemy posture efficiently. The moment they stagger, Exploit becomes available — and its damage is the highest burst in Sable\'s kit.',
+      why: 'Bleed Edge builds enemy posture efficiently. Exploit is always playable, but doubles from 14 to 28 damage the moment they stagger — turning a reliable strike into Sable\'s highest burst.',
     },
     {
       combo: 'Vanish → Slit Throat',
       why: 'Vanish nullifies an incoming hit entirely. Slit Throat can only be used while evading — chain them together for a defensive dodge that becomes a lethal counter.',
     },
-    {
+{
       combo: 'Death Mark → any damaging card',
       why: 'Death Mark adds bonus damage to your next hit, regardless of what it is. Pair it with Shadow Strike for a cheap, reliable burst.',
+    },
+    {
+      combo: 'Ghost Step → next attack',
+      why: 'Ghost Step recovers 15 posture and marks your next attack for a Stamina discount. Chain it into an expensive burst like Twin Fangs or Rupture and you spend one Stamina less than the card costs — a rhythm setup that turns economy into pressure.',
     },
   ],
 }

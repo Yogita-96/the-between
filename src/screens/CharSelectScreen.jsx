@@ -20,10 +20,10 @@ const CHARACTERS = [
     images: [kaenImg, kaenProfile1, kaenAction],
     stats: { hp: 100, stamina: 5, agility: 2 },
     moves: [
-      { name: 'Greatsword Strike', desc: '20 dmg · posture +12', cost: '3 ST' },
-      { name: 'Shield Bash',       desc: '8 dmg · posture +18',  cost: '2 ST' },
-      { name: 'Endure',            desc: 'Block incoming · posture −30', cost: '1 ST' },
-      { name: 'Ruin Strike',       desc: 'Scales with missing HP', cost: '4 ST' },
+      { name: 'Greatsword Strike', desc: '20 dmg · enemy posture +12', cost: '3 ST' },
+      { name: 'Shield Bash', desc: '8 dmg · enemy posture +18', cost: '2 ST' },
+      { name: 'Endure', desc: 'Blocks next incoming hit · recover 30 posture', cost: '1 ST' },
+      { name: 'Ruin Strike', desc: '16 dmg base · scales up with your missing HP', cost: '4 ST' },
     ],
   },
   {
@@ -36,10 +36,10 @@ const CHARACTERS = [
     images: [sableImg, sableProfile, sableAction],
     stats: { hp: 65, stamina: 5, agility: 5 },
     moves: [
-      { name: 'Shadow Strike', desc: '18 dmg · fast and cheap',        cost: '2 ST' },
-      { name: 'Vanish',        desc: 'Sidestep — nullifies incoming hit', cost: '1 ST' },
-      { name: 'Exploit',       desc: '28 dmg · only when enemy staggered', cost: '3 ST' },
-      { name: 'Bleed Edge',    desc: '10 dmg · posture +14 · sets up stagger', cost: '2 ST' },
+      { name: 'Shadow Strike', desc: '18 dmg · enemy posture +6', cost: '2 ST' },
+      { name: 'Vanish', desc: 'Evade the next incoming hit', cost: '1 ST' },
+      { name: 'Exploit', desc: '14 dmg · 28 if enemy staggered', cost: '3 ST' },
+      { name: 'Bleed Edge', desc: '10 dmg · enemy posture +14 · sets up stagger', cost: '2 ST' },
     ],
   },
 ]

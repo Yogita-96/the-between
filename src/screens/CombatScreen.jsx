@@ -43,6 +43,13 @@ const DEFEAT_LINES = {
   ],
 }
 
+// ─── SKIP TURN LINES ────────────────────────────────────────
+// One line per character. Fires only when hand is fully unplayable.
+const SKIP_LINES = {
+  kaen:  'Kaen stays his hand. The moment is not his.',
+  sable: "Sable's step is off. She lets it go.",
+}
+
 // ─── ENEMY INTENT POOLS ───────────────────────────────────────
 const REMNANT_INTENTS = [
   { type: 'attack', label: 'Reach',  line: "It reaches for you with what's left of its hands.", dmg: 22, posture: 25 },
@@ -206,6 +213,14 @@ export default function CombatScreen({
   const [playerST,      setPlayerST]      = useState(5)
   const [playerPosture, setPlayerPosture] = useState(0)
   const [playerStaggered, setPlayerStaggered] = useState(false)
+  // Ghost Step chain — next damaging card costs 1 less ST
+  const [nextAttackDiscount, setNextAttackDiscount] = useState(false)
+  // Floating damage/heal numbers on screen
+  const [floatingNumbers, setFloatingNumbers] = useState([])
+  const [enemyWindingUp, setEnemyWindingUp] = useState(false)
+  const [playerHpFlash, setPlayerHpFlash] = useState(false)
+  const [enemyHpFlash, setEnemyHpFlash] = useState(false)
+  const [lastIntent, setLastIntent] = useState(null)
 
   // ── STAMINA ECONOMY ──
   // Stamina regenerates partially each turn (not a full reset), so spending
@@ -215,6 +230,7 @@ export default function CombatScreen({
   const ST_REGEN = 3
   const [showFleeConfirm, setShowFleeConfirm] = useState(false)
   const [showSettings,    setShowSettings]    = useState(false)
+  const [showPostureIntro, setShowPostureIntro] = useState(false)
 
   // ─── ENEMY STATE ───────────────────────────────────────────
   const [enemyHP,        setEnemyHP]        = useState(enemyConfig.hp)
@@ -247,6 +263,15 @@ export default function CombatScreen({
   const addLog = useCallback((msg) => {
     setLog(prev => [msg, ...prev].slice(0, 4))
   }, [])
+
+  // Push a floating number that fades out over 1.5s
+  const spawnFloatingNumber = (value, target, kind) => {
+    const id = Math.random().toString(36).slice(2, 9)
+    setFloatingNumbers(prev => [...prev, { id, value, target, kind }])
+    setTimeout(() => {
+      setFloatingNumbers(prev => prev.filter(n => n.id !== id))
+    }, 1500)
+  }
 
   // Draws a fresh hand excluding lastHandRef, updates both state and ref atomically
   const drawFresh = useCallback(() => {
@@ -298,16 +323,19 @@ export default function CombatScreen({
   const enemyTurnProcessing = useRef(false)
 
   // Refs for the stagger-window draw guarantee (read inside drawFresh callback)
+  const nextTurnStaminaPenaltyRef = useRef(0)
   const isKaenRef = useRef(isKaen)
   const enemyPostureRef = useRef(0)
   const postureThresholdRef = useRef(enemyPostureThreshold)
 
   // Keep stagger-window refs current for the drawFresh callback
+  /* eslint-disable react-hooks/immutability */
   useEffect(() => {
     isKaenRef.current = isKaen
     enemyPostureRef.current = enemyPosture
     postureThresholdRef.current = enemyPostureThreshold
   }, [isKaen, enemyPosture, enemyPostureThreshold])
+  /* eslint-enable react-hooks/immutability */
 
   // Roll a new enemy intent for the upcoming turn
   const rollIntent = useCallback(() => {
@@ -315,10 +343,25 @@ export default function CombatScreen({
     setIntent(pool[Math.floor(Math.random() * pool.length)])
   }, [])
 
+  // One-time posture pressure tutorial — first time player posture climbs high
+  useEffect(() => {
+    if (playerPosture > 50 && !localStorage.getItem('seenPostureIntro')) {
+      setShowPostureIntro(true)
+      localStorage.setItem('seenPostureIntro', 'true')
+    }
+  }, [playerPosture])
+
   // ─── PLAYER ACTS ───────────────────────────────────────────
   const playerMove = (move) => {
     if (phase !== 'player') return
-    if (playerST < move.cost) {
+
+    // Ghost Step discount: −1 ST off next damaging card
+    const isDamagingCard = move.dmg > 0
+    const effectiveCost = (nextAttackDiscount && isDamagingCard)
+      ? Math.max(0, move.cost - 1)
+      : move.cost
+
+    if (playerST < effectiveCost) {
       addLog('Not enough stamina.')
       return
     }
@@ -398,7 +441,13 @@ export default function CombatScreen({
       addLog(`Staggered — ${charName} strikes deep!`)
     }
 
-    setPlayerST(st => st - move.cost)
+    setPlayerST(st => st - effectiveCost)
+
+    // Consume Ghost Step discount if it applied to this card
+    if (nextAttackDiscount && isDamagingCard) {
+      setNextAttackDiscount(false)
+      addLog('— Ghost Step chain.')
+    }
 
     // ── Specials that affect player state ──
 
@@ -435,10 +484,11 @@ export default function CombatScreen({
       setPlayerPosture(p => Math.max(0, p - 20))
     }
 
-    // Ghost Step (Sable) — no damage, posture relief
+    // Ghost Step (Sable) — posture recovery + chain enabler
     if (move.special === 'ghost') {
       setPlayerPosture(p => Math.max(0, p - 15))
-      addLog('Sable ghosts through the shadow.')
+      setNextAttackDiscount(true)
+      addLog('Sable moves like she is already gone.')
     }
 
     // Shadowmeld (Sable) — go still, posture relief
@@ -499,6 +549,9 @@ export default function CombatScreen({
     // ── Apply damage to enemy ──
     if (dmg > 0) {
       setEnemyHP(hp => Math.max(0, hp - dmg))
+      spawnFloatingNumber(dmg, 'enemy', 'damage')
+      setEnemyHpFlash(true)
+      setTimeout(() => setEnemyHpFlash(false), 600)
       if (move.special === 'twin') {
         addLog(`Sable uses Twin Fangs — 12 + 12 dmg.`)
       } else {
@@ -521,18 +574,59 @@ export default function CombatScreen({
     setPhase('enemy')
   }
 
-  // ─── ENEMY ACTS (after a short beat) ───────────────────────
+  // ─── PLAYER SKIPS TURN ─────────────────────────────────────
+  // Only fires when hand is fully unplayable. Character-specific cost:
+  // Kaen (tank) — bigger stagger, smaller stamina hit.
+  // Sable (finesse) — smaller stagger, bigger stamina hit.
+  // Enemy still executes their intent normally on their turn.
+  const playerSkipTurn = () => {
+    if (!canSkipTurn) return
+
+    const posturePenalty = isKaen ? 20 : 10
+    const staminaPenalty = isKaen ? 2  : 3
+
+    addLog(SKIP_LINES[isKaen ? 'kaen' : 'sable'])
+
+    // Player posture takes stagger damage
+    setPlayerPosture(p => {
+      const np = Math.min(100, p + posturePenalty)
+      if (np >= 100) {
+        setPlayerStaggered(true)
+        addLog('Your guard shatters — you are staggered!')
+        return 0
+      }
+      return np
+    })
+
+    // Stamina penalty applied at start of next turn (during enemy turn cleanup)
+    nextTurnStaminaPenaltyRef.current = staminaPenalty
+
+    // Hand over to enemy — they'll execute intent as normal
+    setPhase('enemy')
+  }
+
+  
+// ─── ENEMY ACTS (multi-phase for readability) ───────────────
+  // Phase timing:
+  //   0ms:      Turn label switches to "Enemy Turn", cards fade
+  //   500ms:    Intent box pulses (enemy is winding up)
+  //   1400ms:   Attack lands — damage applies, floater spawns, HP bar shakes
+  //   2400ms:   Cleanup, new hand, back to player turn
   useEffect(() => {
     if (phase !== 'enemy') return
-    // Guard against re-entry: this effect lists playerHP/enemyHP etc as deps,
-    // so applying damage mid-turn would re-trigger it. Process each enemy
-    // phase exactly once.
     if (enemyTurnProcessing.current) return
     enemyTurnProcessing.current = true
 
-    const t = setTimeout(() => {
+    // Beat 1 — brief pause so player registers the phase change
+    const t1 = setTimeout(() => {
+      setEnemyWindingUp(true)
+    }, 700)
 
-      // Hemorrhage bleed — apply 8 dmg to enemy at start of their turn
+    // Beat 2 — the attack lands
+    const t2 = setTimeout(() => {
+      setEnemyWindingUp(false)
+
+      // Hemorrhage bleed
       if (hemorrhageBleed) {
         setEnemyHP(hp => Math.max(0, hp - 8))
         setHemorrhageBleed(false)
@@ -545,20 +639,19 @@ export default function CombatScreen({
         return
       }
 
-      // Cartographer phase 2 — below 50% HP the map completes.
-      // Every intent hidden. Every hit harder. One-time announcement.
+      // Cartographer phase 2
       if (nodeType === 'boss' && enemyHP <= enemyMaxHP / 2 && !bossPhase2.current) {
         bossPhase2.current = true
         intentPoolRef.current = CARTOGRAPHER_PHASE2_INTENTS
         addLog('The Cartographer closes the map. It no longer needs to watch you.')
       }
 
-      // Enemy posture break → stagger (bosses resist: threshold 150 vs 100)
+      // Enemy posture break → stagger
       if (enemyPosture >= enemyPostureThreshold && !enemyStaggered) {
         setEnemyStaggered(true)
         setEnemyPosture(0)
         addLog(`${enemyConfig.name} breaks — staggered!`)
-        setPlayerST(ST_MAX) // stagger break rewards full stamina — capitalize on the opening
+        setPlayerST(ST_MAX)
         setShufflesUsed(0)
         drawFresh()
         rollIntent()
@@ -567,23 +660,21 @@ export default function CombatScreen({
         return
       }
 
-      // Damage dealt to the player this enemy turn (0 if blocked/evaded/guarded)
       let damageThisTurn = 0
 
-      // Enemy was staggered — recovers
       if (enemyStaggered) {
         setEnemyStaggered(false)
         setTookHitLastTurn(false)
       } else if (playerStaggered) {
-        // Player staggered last turn — enemy lands free heavy hit
         setPlayerStaggered(false)
         damageThisTurn = 25
         setTookHitLastTurn(true)
         addLog(`Staggered! ${enemyConfig.name} strikes you unguarded — 25 dmg.`)
       } else {
-        // Enemy executes telegraphed intent
+          // Save the intent that's about to execute so we can display it after
+        setLastIntent(intent)
+
         if (intent.type === 'attack') {
-          // Endure (Kaen) or Vanish (Sable) — block/evade the hit
           if (enduring || evading) {
             if (enduring) addLog('Kaen absorbs the blow — no damage taken.')
             if (evading)  addLog('Sable was never there — the blow finds air.')
@@ -592,7 +683,6 @@ export default function CombatScreen({
             setBackstepping(false)
             setTookHitLastTurn(false)
           } else {
-            // Hit lands — Backstep softens it by 8 (min 0)
             let incoming = intent.dmg
             if (backstepping) {
               incoming = Math.max(0, incoming - 8)
@@ -602,7 +692,6 @@ export default function CombatScreen({
             damageThisTurn = incoming
             setTookHitLastTurn(true)
 
-            // Build player posture
             if (intent.posture > 0) {
               setPlayerPosture(p => {
                 const np = Math.min(100, p + intent.posture)
@@ -622,7 +711,6 @@ export default function CombatScreen({
             }
           }
         } else {
-          // Enemy guarded — handle special guard effects
           if (intent.healSelf) {
             setEnemyHP(hp => Math.min(enemyMaxHP, hp + intent.healSelf))
             addLog(`${intent.line} (${intent.healSelf} HP restored)`)
@@ -633,40 +721,57 @@ export default function CombatScreen({
         }
       }
 
-      // Apply damage. playerHP in this closure already reflects any heal from
-      // the player's turn (that state committed before this effect ran), so we
-      // compute the true resulting HP synchronously and branch immediately.
+      // Apply damage and spawn floater
       const resultingHP = Math.max(0, playerHP - damageThisTurn)
       setPlayerHP(resultingHP)
-
-      enemyTurnProcessing.current = false
-
-      if (resultingHP <= 0) {
-        setPhase('lost')
-      } else {
-        setPlayerST(st => Math.min(ST_MAX, st + ST_REGEN))
-        setShufflesUsed(0)
-        setTookHitLastTurn(false)
-        if (exposeTurns > 0) {
-          setExposeTurns(t => {
-            const next = t - 1
-            if (next === 0) addLog('The guard reforms. The opening is gone.')
-            return next
-          })
-        }
-        drawFresh()
-        rollIntent()
-        setPhase('player')
+      if (damageThisTurn > 0) {
+        spawnFloatingNumber(damageThisTurn, 'player', 'damage')
+        setPlayerHpFlash(true)
+        setTimeout(() => setPlayerHpFlash(false), 600)
       }
-    }, 900)
 
-    return () => clearTimeout(t)
+      // Beat 3 — cleanup after the hit lands
+      setTimeout(() => {
+        enemyTurnProcessing.current = false
+
+        if (resultingHP <= 0) {
+          setPhase('lost')
+        } else {
+          const penalty = nextTurnStaminaPenaltyRef.current
+          setPlayerST(st => {
+            const regenerated = Math.min(ST_MAX, st + ST_REGEN)
+            return Math.max(0, regenerated - penalty)
+          })
+          if (penalty > 0) {
+            addLog(`${charName} moves stiffly — stamina falters (−${penalty} ST).`)
+            nextTurnStaminaPenaltyRef.current = 0
+          }
+          setShufflesUsed(0)
+          setTookHitLastTurn(false)
+          if (exposeTurns > 0) {
+            setExposeTurns(t => {
+              const next = t - 1
+              if (next === 0) addLog('The guard reforms. The opening is gone.')
+              return next
+            })
+          }
+          drawFresh()
+          rollIntent()
+          setPhase('player')
+        }
+      }, 1400)
+    }, 1800)
+
+    return () => {
+      clearTimeout(t1)
+      clearTimeout(t2)
+    }
   }, [
     phase, enemyHP, enemyPosture, enemyStaggered,
     playerHP, playerStaggered, intent, enduring, evading,
     deathMarked, tookHitLastTurn, hemorrhageBleed, backstepping,
     rollIntent, addLog, drawFresh,
-    enemyConfig.name, enemyMaxHP, nodeType, enemyPostureThreshold, exposeTurns, // stable for combat lifetime but required by exhaustive-deps
+    enemyConfig.name, enemyMaxHP, nodeType, enemyPostureThreshold, exposeTurns, charName,
   ])
 
   // ─── AUTO-TRIGGER onWin FOR DUAL-REMNANT FIRST PHASE ─────────
@@ -737,8 +842,19 @@ export default function CombatScreen({
     )
   }
 
-  // ─── SHUFFLE BUTTON STATE ──────────────────────────────────
+// ─── SHUFFLE BUTTON STATE ──────────────────────────────────
   const canShuffle = phase === 'player' && shufflesUsed === 0 && playerST >= 2
+
+  // ─── SKIP TURN STATE ───────────────────────────────────────
+  // Only available when no card in hand is playable (unaffordable AND ungated).
+  // Escape hatch for soft-lock — costs posture + stamina, still eats intent.
+  const canPlayAnyCard = phase === 'player' && hand.some(move => {
+    if (playerST < move.cost) return false
+    if (move.special === 'jugular'    && !enemyStaggered) return false
+    if (move.special === 'slitthroat' && !evading)        return false
+    return true
+  })
+  const canSkipTurn = phase === 'player' && !canPlayAnyCard
 
   // ─── MAIN COMBAT UI ────────────────────────────────────────
   return (
@@ -746,9 +862,30 @@ export default function CombatScreen({
       <div className="combat-overlay" />
 
       {/* Fixed screen-edge controls */}
-      <button className="combat-side-btn combat-flee-corner" onClick={() => setShowFleeConfirm(true)}>
-        ⚔ Flee
-      </button>
+      {/* Fixed screen-edge controls */}
+      {/* Screen-edge controls — Flee/Skip switch to center when soft-locked */}
+      {canSkipTurn ? (
+        <>
+          <button
+            className="combat-side-btn--centered combat-flee--centered"
+            onClick={() => setShowFleeConfirm(true)}
+            title="Abandon this run entirely. No reward."
+          >
+            ⚔ Flee
+          </button>
+          <button
+            className="combat-side-btn--centered combat-skip--centered"
+            onClick={playerSkipTurn}
+            title={`Skip turn — you'll take the enemy's hit, ${isKaen ? 'lose 20 posture, and start next turn with 2 less stamina.' : 'lose 10 posture, and start next turn with 3 less stamina.'}`}
+          >
+            ⏭ Skip Turn
+          </button>
+        </>
+      ) : (
+        <button className="combat-side-btn combat-flee-corner" onClick={() => setShowFleeConfirm(true)}>
+          ⚔ Flee
+        </button>
+      )}
       <button
         className="settings-icon-circular"
         onClick={() => setShowSettings(true)}
@@ -782,12 +919,42 @@ export default function CombatScreen({
         </div>
       )}
 
+      {/* Posture Pressure tutorial — one-time contextual hint */}
+      {showPostureIntro && (
+        <div className="combat-confirm-backdrop" onClick={() => setShowPostureIntro(false)}>
+          <div className="combat-confirm-box combat-posture-intro" onClick={e => e.stopPropagation()}>
+            <div className="combat-posture-intro-title">Posture Pressure</div>
+            <p className="combat-posture-intro-text">
+              Your posture builds as the enemy pressures you. At <strong>100</strong>, your guard shatters — the next hit lands unguarded for <strong>25 dmg</strong>.
+            </p>
+            <p className="combat-posture-intro-text">
+              Cards like {isKaen ? <><em>Rally</em>, <em>Endure</em>, and <em>Iron Will</em></> : <><em>Shadowmeld</em>, <em>Backstep</em>, and <em>Ghost Step</em></>} recover posture. Watch your bar.
+            </p>
+          <button className="combat-confirm-cancel" onClick={() => setShowPostureIntro(false)}>
+              Understood
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Settings modal */}
       {showSettings && (
         <SettingsModal onClose={() => setShowSettings(false)} onMusicVolumeChange={onMusicVolumeChange} />
       )}
 
       <div className="combat-content">
+
+        {/* Floating damage/heal numbers */}
+        <div className="combat-floaters">
+          {floatingNumbers.map(fn => (
+            <div
+              key={fn.id}
+              className={`combat-floater combat-floater--${fn.target} combat-floater--${fn.kind}`}
+            >
+              −{fn.value}
+            </div>
+          ))}
+        </div>
 
         {/* ── Stat bars ── */}
         <div className="combat-stats">
@@ -799,7 +966,7 @@ export default function CombatScreen({
               <span className="combat-bar-label">HP</span>
               <span className="combat-bar-val">{playerHP} / {playerMaxHP}</span>
             </div>
-            <div className="combat-bar">
+            <div className={`combat-bar ${playerHpFlash ? 'combat-bar--flash' : ''}`}>
               <div
                 className="combat-bar-fill combat-bar-fill--hp"
                 style={{ width: `${(playerHP / playerMaxHP) * 100}%` }}
@@ -835,7 +1002,7 @@ export default function CombatScreen({
               <span className="combat-bar-label">HP</span>
               <span className="combat-bar-val">{enemyHP} / {enemyMaxHP}</span>
             </div>
-            <div className="combat-bar">
+            <div className={`combat-bar ${enemyHpFlash ? 'combat-bar--flash' : ''}`}>
               <div
                 className="combat-bar-fill combat-bar-fill--hp"
                 style={{ width: `${(enemyHP / enemyMaxHP) * 100}%` }}
@@ -853,16 +1020,17 @@ export default function CombatScreen({
           </div>
         </div>
 
-        {/* ── Enemy intent ── */}
-        {phase === 'player' && !enemyStaggered && (
-          playerStaggered ? (
+        {/* ── Enemy intent / last action ── */}
+        {!enemyStaggered && (
+          playerStaggered && phase === 'player' ? (
             <div className="combat-intent combat-intent--danger">
               <div className="combat-intent-label">⚠ You Are Staggered</div>
               <div className="combat-intent-line combat-intent-line--danger">
                 "Open. Undefended. The next blow lands unguarded — 25 dmg."
               </div>
             </div>
-          ) : (
+          ) : phase === 'player' ? (
+            // Player turn — show upcoming intent
             <div className={`combat-intent ${intent.hidden ? 'combat-intent--hidden' : ''}`}>
               {intent.hidden ? (
                 <>
@@ -881,6 +1049,38 @@ export default function CombatScreen({
                   </div>
                 </>
               )}
+            </div>
+          ) : (
+            // Enemy turn — show winding intent, then last action
+            <div className={`combat-intent ${enemyWindingUp ? 'combat-intent--winding' : 'combat-intent--past'}`}>
+              {enemyWindingUp ? (
+                intent.hidden ? (
+                  <>
+                    <div className="combat-intent-label">✦ Intent — Unknown</div>
+                    <div className="combat-intent-line combat-intent-line--hidden">
+                      "It has already decided."
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="combat-intent-label">
+                      {intent.type === 'attack' ? '⚔' : '🛡'} Intent — {intent.label}
+                    </div>
+                    <div className="combat-intent-line">
+                      "{intent.line}"{intent.dmg > 0 && ` — ${intent.dmg} dmg`}
+                    </div>
+                  </>
+                )
+              ) : lastIntent ? (
+                <>
+                  <div className="combat-intent-label">
+                    {lastIntent.type === 'attack' ? '⚔' : '🛡'} Attacked — {lastIntent.label}
+                  </div>
+                  <div className="combat-intent-line">
+                    "{lastIntent.line}"{lastIntent.dmg > 0 && ` — ${lastIntent.dmg} dmg`}
+                  </div>
+                </>
+              ) : null}
             </div>
           )
         )}
@@ -903,8 +1103,8 @@ export default function CombatScreen({
 
         {/* ── Moves + Shuffle ── */}
         <div className="combat-moves-wrap">
-          <div className="combat-turn-label">
-            {phase === 'player' ? 'Your Turn' : '...'}
+          <div className={`combat-turn-label ${phase === 'enemy' ? 'combat-turn-label--enemy' : ''}`}>
+            {phase === 'player' ? 'Your Turn' : 'Enemy Turn'}
           </div>
 
           {/* Hand — 4 drawn cards */}
@@ -919,7 +1119,7 @@ export default function CombatScreen({
               return (
                 <button
                   key={move.name}
-                  className={`combat-move ${disabled ? 'disabled' : ''} ${locked ? 'locked' : ''}`}
+                  className={`combat-move ${disabled ? 'disabled' : ''} ${locked ? 'locked' : ''} ${phase === 'enemy' ? 'combat-move--enemy-turn' : ''}`}
                   onClick={(e) => {
                     e.stopPropagation()
                     if (locked) {
@@ -940,7 +1140,7 @@ export default function CombatScreen({
           {/* Shuffle button */}
           <div className="combat-shuffle-wrap">
             <button
-              className={`combat-shuffle-btn ${!canShuffle ? 'disabled' : ''}`}
+              className={`combat-shuffle-btn ${!canShuffle ? 'disabled' : ''} ${phase === 'enemy' ? 'combat-shuffle-btn--enemy-turn' : ''}`}
               onClick={shuffleHand}
               disabled={!canShuffle}
             >
@@ -968,7 +1168,6 @@ export default function CombatScreen({
         </>,
         document.body
       )}
-
-    </div>
+</div>
   )
 }
