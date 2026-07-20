@@ -81,7 +81,6 @@ const CARTOGRAPHER_INTENTS = [
 ]
 
 // Cartographer PHASE 2 — below 50% HP. Every intent hidden. Harder hits.
-// The map is complete. It no longer needs to explain itself.
 const CARTOGRAPHER_PHASE2_INTENTS = [
   { type: 'attack', label: 'Erase',        line: "A section of the world simply stops being there.", dmg: 32, posture: 30, hidden: true },
   { type: 'attack', label: 'Redraw All',   line: "Everything shifts at once. You were standing somewhere else a moment ago.", dmg: 28, posture: 35, hidden: true },
@@ -266,7 +265,7 @@ export default function CombatScreen({
 
   // Push a floating number that fades out over 1.5s
   const spawnFloatingNumber = (value, target, kind) => {
-    const id = Math.random().toString(36).slice(2, 9)
+    const id = ++floatingIdRef.current
     setFloatingNumbers(prev => [...prev, { id, value, target, kind }])
     setTimeout(() => {
       setFloatingNumbers(prev => prev.filter(n => n.id !== id))
@@ -322,11 +321,14 @@ export default function CombatScreen({
   // Guards the enemy-turn effect against re-entry (deps change mid-processing)
   const enemyTurnProcessing = useRef(false)
 
-  // Refs for the stagger-window draw guarantee (read inside drawFresh callback)
+ // Refs for the stagger-window draw guarantee (read inside drawFresh callback)
   const nextTurnStaminaPenaltyRef = useRef(0)
   const isKaenRef = useRef(isKaen)
   const enemyPostureRef = useRef(0)
   const postureThresholdRef = useRef(enemyPostureThreshold)
+
+  // Counter for unique floating-number IDs (avoids Math.random impurity warning)
+  const floatingIdRef = useRef(0)
 
   // Keep stagger-window refs current for the drawFresh callback
   /* eslint-disable react-hooks/immutability */
@@ -343,9 +345,9 @@ export default function CombatScreen({
     setIntent(pool[Math.floor(Math.random() * pool.length)])
   }, [])
 
-  // One-time posture pressure tutorial — first time player posture climbs high
-  useEffect(() => {
+useEffect(() => {
     if (playerPosture > 50 && !localStorage.getItem('seenPostureIntro')) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowPostureIntro(true)
       localStorage.setItem('seenPostureIntro', 'true')
     }
