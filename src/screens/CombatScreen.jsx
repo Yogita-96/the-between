@@ -214,6 +214,16 @@ export default function CombatScreen({
   const [playerStaggered, setPlayerStaggered] = useState(false)
   // Ghost Step chain — next damaging card costs 1 less ST
   const [nextAttackDiscount, setNextAttackDiscount] = useState(false)
+  // Single source of truth for what a card actually costs right now, including
+  // the Ghost Step discount. Every place that checks affordability MUST use
+  // this — resolution, the soft-lock check, and the button-disable state — so
+  // they can never disagree (that drift was the soft-lock bug).
+  const effectiveCostOf = (move) => {
+    const isDamagingCard = move.dmg > 0
+    return (nextAttackDiscount && isDamagingCard)
+      ? Math.max(0, move.cost - 1)
+      : move.cost
+  }
   // Floating damage/heal numbers on screen
   const [floatingNumbers, setFloatingNumbers] = useState([])
   const [enemyWindingUp, setEnemyWindingUp] = useState(false)
@@ -249,7 +259,7 @@ export default function CombatScreen({
   const [phase,           setPhase]           = useState('player')
   const [enduring,        setEnduring]        = useState(false)
   const [evading,         setEvading]         = useState(false)
-  const [deathMarked,     setDeathMarked]     = useState(false)
+  const [deathMarkStacks, setDeathMarkStacks] = useState(0) // each stack = +12 dmg on next attack, all consumed at once
   const [tookHitLastTurn, setTookHitLastTurn] = useState(false)
   const [hemorrhageBleed, setHemorrhageBleed] = useState(false)
   const [backstepping,    setBackstepping]    = useState(false) // Sable: −8 dmg from next hit
@@ -357,11 +367,9 @@ useEffect(() => {
   const playerMove = (move) => {
     if (phase !== 'player') return
 
-    // Ghost Step discount: −1 ST off next damaging card
+    // Ghost Step discount handled by the shared effectiveCostOf helper
     const isDamagingCard = move.dmg > 0
-    const effectiveCost = (nextAttackDiscount && isDamagingCard)
-      ? Math.max(0, move.cost - 1)
-      : move.cost
+    const effectiveCost = effectiveCostOf(move)
 
     if (playerST < effectiveCost) {
       addLog('Not enough stamina.')
@@ -396,6 +404,19 @@ useEffect(() => {
       dmg = 12 + 12
     }
 
+    // Exploit — base damage set here (BEFORE Death Mark / stagger) so those
+    // bonuses stack on top instead of being overwritten. Full 28 when the
+    // enemy is staggered, reduced 14 otherwise. Never a dead card, but
+    // massively rewards setting up the stagger first.
+    if (move.special === 'exploit') {
+      dmg = enemyStaggered ? 28 : 14
+      addLog(
+        enemyStaggered
+          ? 'Sable exploits the opening — full force.'
+          : 'Sable strikes, but the guard holds.'
+      )
+    }
+
     // ── KAEN RESOLVE ──
     // Kaen's basic attacks scale with his OWN posture. The more pressure
     // he's under, the harder he hits — but high posture = one hit from
@@ -415,26 +436,19 @@ useEffect(() => {
       addLog('Retaliate — hit back harder!')
     }
 
-    // ── DEATH MARK (Sable) — now stacks and applies to combos ──
-    // Consumed on next damaging move, +12 (buffed from +10), stacks with
-    // stagger bonus and Exploit so a marked Exploit hits like a truck.
-    if (deathMarked && dmg > 0 && move.special !== 'deathmark') {
-      dmg += 12
-      setDeathMarked(false)
-      addLog('Death Mark — target struck!')
-    }
-
-    // ── EXPLOIT (Sable) — reworked: always playable ──
-    // Full 28 when staggered, reduced 14 when not. Never a dead card,
-    // but massively rewards setting up the stagger first.
-    if (move.special === 'exploit') {
-      if (enemyStaggered) {
-        dmg = 28
-        addLog('Sable exploits the opening — full force.')
-      } else {
-        dmg = 14
-        addLog('Sable strikes an unguarded gap — but the moment isn\'t right.')
-      }
+    // ── DEATH MARK (Sable) — stacks, consumed all at once on next attack ──
+    // Each stack adds +12 dmg. Multiple casts accumulate, then the whole
+    // stack is spent on the next damaging move — stacks with the stagger
+    // bonus and Exploit so a marked Exploit hits like a truck.
+    if (deathMarkStacks > 0 && dmg > 0 && move.special !== 'deathmark') {
+      const markBonus = deathMarkStacks * 12
+      dmg += markBonus
+      setDeathMarkStacks(0)
+      addLog(
+        deathMarkStacks > 1
+          ? `Death Mark ×${deathMarkStacks} — target struck for +${markBonus}!`
+          : 'Death Mark — target struck!'
+      )
     }
 
     // Stagger bonus on any damaging move
@@ -512,9 +526,9 @@ useEffect(() => {
       addLog('Sable finds the seam in its defense — the guard cracks.')
     }
 
-    // Death Mark (Sable) — next attack deals +12 dmg
+    // Death Mark (Sable) — adds a +12 stack to the next attack (stacks)
     if (move.special === 'deathmark') {
-      setDeathMarked(true)
+      setDeathMarkStacks(s => s + 1)
       addLog('Sable marks her target.')
     }
 
@@ -771,7 +785,7 @@ useEffect(() => {
   }, [
     phase, enemyHP, enemyPosture, enemyStaggered,
     playerHP, playerStaggered, intent, enduring, evading,
-    deathMarked, tookHitLastTurn, hemorrhageBleed, backstepping,
+    tookHitLastTurn, hemorrhageBleed, backstepping,
     rollIntent, addLog, drawFresh,
     enemyConfig.name, enemyMaxHP, nodeType, enemyPostureThreshold, exposeTurns, charName,
   ])
@@ -851,7 +865,7 @@ useEffect(() => {
   // Only available when no card in hand is playable (unaffordable AND ungated).
   // Escape hatch for soft-lock — costs posture + stamina, still eats intent.
   const canPlayAnyCard = phase === 'player' && hand.some(move => {
-    if (playerST < move.cost) return false
+    if (playerST < effectiveCostOf(move)) return false
     if (move.special === 'jugular'    && !enemyStaggered) return false
     if (move.special === 'slitthroat' && !evading)        return false
     return true
@@ -1112,7 +1126,7 @@ useEffect(() => {
           {/* Hand — 4 drawn cards */}
           <div className="combat-moves" onClick={() => setLockedPopup(null)}>
             {hand.map((move) => {
-              const notAffordable = playerST < move.cost || phase !== 'player'
+              const notAffordable = playerST < effectiveCostOf(move) || phase !== 'player'
               const locked =
                 (move.special === 'jugular'    && !enemyStaggered) ||
                 (move.special === 'slitthroat' && !evading)
