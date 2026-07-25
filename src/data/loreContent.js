@@ -161,9 +161,9 @@ export const SYNERGIES = {
       combo: 'Vanish → Slit Throat',
       why: 'Vanish nullifies an incoming hit entirely. Slit Throat can only be used while evading — chain them together for a defensive dodge that becomes a lethal counter.',
     },
-{
-      combo: 'Death Mark → any damaging card',
-      why: 'Death Mark adds bonus damage to your next hit, regardless of what it is. Pair it with Shadow Strike for a cheap, reliable burst.',
+    {
+      combo: 'Death Mark → Exploit (staggered)',
+      why: 'Death Mark adds +12 to your next hit and stacks — cast it two or three times to bank the bonus, then unload it all on one strike. Its best target is a staggered Exploit: the marks land on top of Exploit\'s full 28, turning quiet setup turns into a single devastating payoff.',
     },
     {
       combo: 'Ghost Step → next attack',

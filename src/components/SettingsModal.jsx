@@ -8,10 +8,17 @@ import './SettingsModal.css'
 export default function SettingsModal({ onClose, onMusicVolumeChange }) {
   const [settings, setSettings] = useState(() => loadSettings())
 
+  // Persist settings whenever any of them change.
   useEffect(() => {
     saveSettings(settings)
-    onMusicVolumeChange?.(settings.musicVolume)
   }, [settings])
+
+  // Live-update the currently playing track's volume when it changes.
+  // onMusicVolumeChange is App's setMusicVolume (a stable state setter),
+  // so listing it here is safe and won't re-fire on unrelated renders.
+  useEffect(() => {
+    onMusicVolumeChange?.(settings.musicVolume)
+  }, [settings.musicVolume, onMusicVolumeChange])
 
   const update = (key, value) => {
     setSettings(prev => ({ ...prev, [key]: value }))
