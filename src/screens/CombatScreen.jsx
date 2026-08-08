@@ -18,7 +18,7 @@ import theUnfinished from '../assets/the-unfinished.png'
 import theCartographer from '../assets/the-cartographer.png'
 import SettingsModal from '../components/SettingsModal'
 import CombatTutorial from './CombatTutorial'
-import { playHitTaken, playClick } from '../utils/audio'
+import { playHitTaken, playClick, playHitKaen, playKaenGreatsword, playHitSable, playDodgeKaen, playDodgeSable, playStaggerBreak, playPlayerEnter } from '../utils/audio'
 import './CombatScreen.css'
 
 // ─── DEFEAT LINES BY ENEMY TIER ──────────────────────────────
@@ -128,6 +128,12 @@ export default function CombatScreen({
   useEffect(() => {
     poolRef.current = MOVES_POOL
   }, [MOVES_POOL])
+
+  // Play the combat-entry sound once when the fight loads. Kaen only for now
+  // (sword unsheathe) — Sable's quieter entry sound is TODO.
+  useEffect(() => {
+    if (isKaen) playPlayerEnter()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const charName    = isKaen ? 'Kaen' : 'Sable'
   const defeatTitle = isKaen ? 'Kaen Falls' : 'Sable Falls'
@@ -481,6 +487,7 @@ useEffect(() => {
 
     // Endure (Kaen) — block + steady posture
     if (move.special === 'endure') {
+      playDodgeKaen()
       setEnduring(true)
       setPlayerPosture(p => Math.max(0, p - 30))
       addLog('Kaen braces — posture steadied.')
@@ -488,6 +495,7 @@ useEffect(() => {
 
     // Vanish (Sable) — sidestep, no posture cost
     if (move.special === 'vanish') {
+      playDodgeSable()
       setEvading(true)
       addLog('Sable steps sideways — gone.')
     }
@@ -576,6 +584,13 @@ useEffect(() => {
 
     // ── Apply damage to enemy ──
     if (dmg > 0) {
+      // Attack sound — character- and card-specific
+      if (isKaen) {
+        if (move.name === 'Greatsword Strike') playKaenGreatsword()
+        else playHitKaen()
+      } else {
+        playHitSable() // plays as a double-strike for Sable
+      }
       setEnemyHP(hp => Math.max(0, hp - dmg))
       spawnFloatingNumber(dmg, 'enemy', 'damage')
       setEnemyHpFlash(true)
@@ -676,6 +691,7 @@ useEffect(() => {
 
       // Enemy posture break → stagger
       if (enemyPosture >= enemyPostureThreshold && !enemyStaggered) {
+        playStaggerBreak()
         setEnemyStaggered(true)
         setEnemyPosture(0)
         addLog(`${enemyConfig.name} breaks — staggered!`)

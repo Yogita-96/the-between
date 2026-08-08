@@ -17,7 +17,7 @@ import './index.css'
 // Silent during active Combat. combatEndPhase tracks whether
 // CombatScreen is currently showing its won/lost screen (music
 // resumes there) vs active fighting (music stays silent).
-const MUSIC_SCREENS = ['mainmenu', 'compendium', 'credits', 'charselect', 'map']
+const MUSIC_SCREENS = ['title', 'mainmenu', 'compendium', 'credits', 'charselect', 'reward', 'map']
 
 function useAmbientMusic(src, shouldPlay) {
   const audioRef = useRef(null)
@@ -168,7 +168,7 @@ function App() {
   // Music plays on menu/lore/map screens, and during combat's
   // win/lose screens — but stays silent during active fighting
   const inCombatScreen = screen === 'combat'
-  const shouldPlayMusic = MUSIC_SCREENS.includes(screen) || (inCombatScreen && combatEndPhase)
+  const shouldPlayMusic = MUSIC_SCREENS.includes(screen) || inCombatScreen
   const setMusicVolume = useAmbientMusic(bgMusic, shouldPlayMusic)
 
   // ─── AUTO-SAVE RUN ON MAP ─────────────────────────────────────
