@@ -18,6 +18,7 @@ import theUnfinished from '../assets/the-unfinished.png'
 import theCartographer from '../assets/the-cartographer.png'
 import SettingsModal from '../components/SettingsModal'
 import CombatTutorial from './CombatTutorial'
+import { playHitTaken } from '../utils/audio'
 import './CombatScreen.css'
 
 // ─── DEFEAT LINES BY ENEMY TIER ──────────────────────────────
@@ -752,6 +753,7 @@ useEffect(() => {
       const resultingHP = Math.max(0, playerHP - damageThisTurn)
       setPlayerHP(resultingHP)
       if (damageThisTurn > 0) {
+        playHitTaken()
         spawnFloatingNumber(damageThisTurn, 'player', 'damage')
         setPlayerHpFlash(true)
         setTimeout(() => setPlayerHpFlash(false), 600)

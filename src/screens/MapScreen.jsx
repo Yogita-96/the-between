@@ -139,7 +139,7 @@ export default function MapScreen({ character, onEnterCombat, completedNodes = [
                     <div key={node.id} className="map-node-wrap">
                       <button
                         className={`map-node map-node--${state} map-node--${node.type}`}
-                        onClick={() => state === 'available' && onEnterCombat(node)}
+                        onClick={() => { if (state === 'available') { playClick(); onEnterCombat(node) } }}
                         onMouseEnter={() => state !== 'locked' && setHoveredNode(node)}
                         onMouseLeave={() => setHoveredNode(null)}
                         disabled={state !== 'available'}

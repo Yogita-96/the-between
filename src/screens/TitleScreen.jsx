@@ -1,4 +1,5 @@
 import betweenBg from '../assets/the-between-bg.png'
+import { playClick } from '../utils/audio'
 import './TitleScreen.css'
 
 export default function TitleScreen({ onBegin }) {
@@ -26,7 +27,7 @@ export default function TitleScreen({ onBegin }) {
           You know only that you are still here.
         </p>
 
-        <button className="title-btn" onClick={onBegin}>
+        <button className="title-btn" onClick={() => { playClick(); onBegin() }}>
           Begin
         </button>
       </div>
