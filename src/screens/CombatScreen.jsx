@@ -18,7 +18,7 @@ import theUnfinished from '../assets/the-unfinished.png'
 import theCartographer from '../assets/the-cartographer.png'
 import SettingsModal from '../components/SettingsModal'
 import CombatTutorial from './CombatTutorial'
-import { playHitTaken } from '../utils/audio'
+import { playHitTaken, playClick } from '../utils/audio'
 import './CombatScreen.css'
 
 // ─── DEFEAT LINES BY ENEMY TIER ──────────────────────────────
@@ -841,7 +841,7 @@ useEffect(() => {
           <p className="combat-end-eyebrow">Victory</p>
           <h2 className="combat-end-title">{endTitle}</h2>
           <p className="combat-end-lore">{endLore}</p>
-          <button className="combat-end-btn" onClick={() => onWin?.(node, playerHP)}>
+          <button className="combat-end-btn" onClick={() => { playClick(); onWin?.(node, playerHP) }}>
             Continue
           </button>
         </div>
@@ -863,7 +863,7 @@ useEffect(() => {
           <p className="combat-end-eyebrow combat-end-eyebrow--defeat">Defeated</p>
           <h2 className="combat-end-title">{defeatTitle}</h2>
           <p className="combat-end-lore combat-end-lore--defeat">"{defeatLine}"</p>
-          <button className="combat-end-btn" onClick={() => onLose?.(node)}>
+          <button className="combat-end-btn" onClick={() => { playClick(); onLose?.(node) }}>
             Return
           </button>
         </div>
@@ -897,34 +897,34 @@ useEffect(() => {
         <>
           <button
             className="combat-side-btn--centered combat-flee--centered"
-            onClick={() => setShowFleeConfirm(true)}
+            onClick={() => { playClick(); setShowFleeConfirm(true) }}
             title="Abandon this run entirely. No reward."
           >
             ⚔ Flee
           </button>
           <button
             className="combat-side-btn--centered combat-skip--centered"
-            onClick={playerSkipTurn}
+            onClick={() => { playClick(); playerSkipTurn() }}
             title={`Skip turn — you'll take the enemy's hit, ${isKaen ? 'lose 20 posture, and start next turn with 2 less stamina.' : 'lose 10 posture, and start next turn with 3 less stamina.'}`}
           >
             ⏭ Skip Turn
           </button>
         </>
       ) : (
-        <button className="combat-side-btn combat-flee-corner" onClick={() => setShowFleeConfirm(true)}>
+        <button className="combat-side-btn combat-flee-corner" onClick={() => { playClick(); setShowFleeConfirm(true) }}>
           ⚔ Flee
         </button>
       )}
       <button
         className="combat-help-icon-circular"
-        onClick={openTutorial}
+        onClick={() => { playClick(); openTutorial() }}
         aria-label="How to play"
       >
         ?
       </button>
       <button
         className="settings-icon-circular"
-        onClick={() => setShowSettings(true)}
+        onClick={() => { playClick(); setShowSettings(true) }}
         aria-label="Settings"
       >
         ⚙
@@ -938,12 +938,13 @@ useEffect(() => {
               Fleeing counts as a loss. No reward will be given.
             </p>
             <div className="combat-confirm-btns">
-              <button className="combat-confirm-cancel" onClick={() => setShowFleeConfirm(false)}>
+              <button className="combat-confirm-cancel" onClick={() => { playClick(); setShowFleeConfirm(false) }}>
                 Stay and Fight
               </button>
               <button
                 className="combat-confirm-flee"
                 onClick={() => {
+                  playClick()
                   setShowFleeConfirm(false)
                   onLose?.(node)
                 }}
@@ -966,7 +967,7 @@ useEffect(() => {
             <p className="combat-posture-intro-text">
               Cards like {isKaen ? <><em>Rally</em>, <em>Endure</em>, and <em>Iron Will</em></> : <><em>Shadowmeld</em>, <em>Backstep</em>, and <em>Ghost Step</em></>} recover posture. Watch your bar.
             </p>
-          <button className="combat-confirm-cancel" onClick={() => setShowPostureIntro(false)}>
+          <button className="combat-confirm-cancel" onClick={() => { playClick(); setShowPostureIntro(false) }}>
               Understood
             </button>
           </div>
@@ -1180,7 +1181,7 @@ useEffect(() => {
           <div className="combat-shuffle-wrap">
             <button
               className={`combat-shuffle-btn ${!canShuffle ? 'disabled' : ''} ${phase === 'enemy' ? 'combat-shuffle-btn--enemy-turn' : ''}`}
-              onClick={shuffleHand}
+              onClick={() => { playClick(); shuffleHand() }}
               disabled={!canShuffle}
             >
               ↻ Redraw Hand

@@ -1,5 +1,6 @@
 import { useState, useEffect, useLayoutEffect, useCallback } from 'react'
 import { COMBAT_TUTORIAL } from '../data/loreContent'
+import { playClick } from '../utils/audio'
 import './CombatTutorial.css'
 
 /* Spotlight walkthrough over the real combat UI.
@@ -104,12 +105,12 @@ export default function CombatTutorial({ onClose }) {
         <span className="tut-title">{current.title}</span>
         <span className="tut-text">{current.text}</span>
         <div className="tut-controls">
-          <button className="tut-skip" onClick={onClose}>Skip</button>
+          <button className="tut-skip" onClick={() => { playClick(); onClose() }}>Skip</button>
           <div className="tut-nav">
             {step > 0 && (
-              <button className="tut-btn tut-btn--back" onClick={back}>Back</button>
+              <button className="tut-btn tut-btn--back" onClick={() => { playClick(); back() }}>Back</button>
             )}
-            <button className="tut-btn tut-btn--next" onClick={next}>
+            <button className="tut-btn tut-btn--next" onClick={() => { playClick(); next() }}>
               {isLast ? 'Got it' : 'Next'}
             </button>
           </div>

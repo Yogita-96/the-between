@@ -76,13 +76,14 @@ export default function MainMenuScreen({
             <div className="mainmenu-confirm-btns">
               <button
                 className="mainmenu-confirm-cancel"
-                onClick={() => setShowNewRunConfirm(false)}
+                onClick={() => { playClick(); setShowNewRunConfirm(false) }}
               >
                 Keep Current Run
               </button>
               <button
                 className="mainmenu-confirm-new"
                 onClick={() => {
+                  playClick()
                   setShowNewRunConfirm(false)
                   onBegin()
                 }}

@@ -84,12 +84,13 @@ export default function MapScreen({ character, onEnterCombat, completedNodes = [
               Leaving now abandons this run. Your progress will be lost.
             </p>
             <div className="map-confirm-btns">
-              <button className="map-confirm-cancel" onClick={() => setShowQuitConfirm(false)}>
+              <button className="map-confirm-cancel" onClick={() => { playClick(); setShowQuitConfirm(false) }}>
                 Stay
               </button>
               <button
                 className="map-confirm-quit"
                 onClick={() => {
+                  playClick()
                   setShowQuitConfirm(false)
                   onQuitToTitle?.()
                 }}

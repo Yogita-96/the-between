@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { buildRewardOptions } from '../data/cards'
+import { playClick } from '../utils/audio'
 import './RewardScreen.css'
 
 export default function RewardScreen({ character, floor, isElite, currentDeck, onChoose }) {
@@ -14,11 +15,13 @@ export default function RewardScreen({ character, floor, isElite, currentDeck, o
   const [chosen, setChosen] = useState(null)
 
   const handleChoose = (option) => {
+    playClick()
     setChosen(option)
     setTimeout(() => onChoose(option), 600)
   }
 
   const handleSkip = () => {
+    playClick()
     setTimeout(() => onChoose(null), 300)
   }
 
