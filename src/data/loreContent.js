@@ -97,6 +97,44 @@ export const BESTIARY = {
   },
 }
 
+// ── Combat tutorial — spotlight walkthrough steps ──
+// Each step points at a real element on the combat screen (by CSS selector),
+// dims everything else, and explains that one piece. Shown once automatically
+// on the first fight (skippable) and replayable via the ? button. The order
+// follows how a turn actually flows: read the threat, act, manage resources.
+export const COMBAT_TUTORIAL = [
+  {
+    selector: '.combat-stat-block--player',
+    title: 'Your bars',
+    text: 'HP is how much life you have left. Posture is your guard — it rises as you take hits, and once it fills, your guard breaks and you take extra damage. Watch both.',
+  },
+  {
+    selector: '.combat-intent',
+    title: 'Enemy intent',
+    text: 'Each turn, the enemy shows what it plans to do and how much damage it will deal. This is why your health drops. Read it before you choose a card.',
+  },
+  {
+    selector: '.combat-moves-wrap',
+    title: 'Your cards',
+    text: 'Your options for the turn. Each one costs Stamina to play. Use them to answer the enemy’s intent — attack, defend, or break its guard.',
+  },
+  {
+    selector: '.combat-stat-block--player .combat-substat:first-child',
+    title: 'Stamina',
+    text: 'Cards cost Stamina. You regain a little each turn, not a full refill. If you run out and can’t afford any card, you’re forced to skip the turn — and skipping has a penalty.',
+  },
+  {
+    selector: '.combat-stat-block--enemy .combat-substat',
+    title: 'Enemy posture',
+    text: 'Landing hits raises the enemy’s posture. When it fills, the enemy staggers — leaving it open and taking extra damage. This is your chance to go on the offensive.',
+  },
+  {
+    selector: '.combat-shuffle-wrap',
+    title: 'Redraw',
+    text: 'Not happy with your hand? Spend 2 Stamina to draw a new one, once per turn. Handy when nothing you’re holding answers the enemy’s intent.',
+  },
+]
+
 export const HOW_TO_PLAY = [
   {
     heading: 'HP — Health',

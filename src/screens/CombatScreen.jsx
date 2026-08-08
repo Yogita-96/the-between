@@ -17,6 +17,7 @@ import remnantF from '../assets/remnant-f.png'
 import theUnfinished from '../assets/the-unfinished.png'
 import theCartographer from '../assets/the-cartographer.png'
 import SettingsModal from '../components/SettingsModal'
+import CombatTutorial from './CombatTutorial'
 import './CombatScreen.css'
 
 // ─── DEFEAT LINES BY ENEMY TIER ──────────────────────────────
@@ -240,6 +241,16 @@ export default function CombatScreen({
   const [showFleeConfirm, setShowFleeConfirm] = useState(false)
   const [showSettings,    setShowSettings]    = useState(false)
   const [showPostureIntro, setShowPostureIntro] = useState(false)
+  // Combat tutorial: auto-opens once on the player's first-ever fight
+  // (gated by localStorage), and is reopenable any time via the ? button.
+  const [showTutorial, setShowTutorial] = useState(
+    () => !localStorage.getItem('seenCombatTutorial')
+  )
+  const closeTutorial = () => {
+    localStorage.setItem('seenCombatTutorial', 'true')
+    setShowTutorial(false)
+  }
+  const openTutorial = () => setShowTutorial(true)
 
   // ─── ENEMY STATE ───────────────────────────────────────────
   const [enemyHP,        setEnemyHP]        = useState(enemyConfig.hp)
@@ -903,6 +914,13 @@ useEffect(() => {
         </button>
       )}
       <button
+        className="combat-help-icon-circular"
+        onClick={openTutorial}
+        aria-label="How to play"
+      >
+        ?
+      </button>
+      <button
         className="settings-icon-circular"
         onClick={() => setShowSettings(true)}
         aria-label="Settings"
@@ -952,6 +970,9 @@ useEffect(() => {
           </div>
         </div>
       )}
+
+      {/* Combat tutorial — spotlight walkthrough, auto once + ? to replay */}
+      {showTutorial && <CombatTutorial onClose={closeTutorial} />}
 
       {/* Settings modal */}
       {showSettings && (

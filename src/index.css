@@ -75,6 +75,38 @@ body {
   color: #c8a030;
   border-color: #c8a030;
 }
+
+.settings-icon-circular:hover {
+  color: #c8a030;
+  border-color: #c8a030;
+}
+
+/* How-to-play ? button — mirrors the settings gear, sits just left of it */
+.combat-help-icon-circular {
+  position: fixed;
+  top: 20px;
+  right: 66px;
+  z-index: 50;
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #8a6a3a;
+  background: rgba(10, 8, 4, 0.7);
+  border: 1px solid #3a2a14;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.combat-help-icon-circular:hover {
+  color: #c8a030;
+  border-color: #c8a030;
+}
  
 @media (max-width: 480px) {
   .settings-icon-circular {
