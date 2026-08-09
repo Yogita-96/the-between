@@ -161,9 +161,7 @@ function App() {
     })
   }
 
-  // Tracks whether CombatScreen is currently showing Victory/Defeat
-  // (music should play) vs active fighting (music stays silent)
-  const [combatEndPhase, setCombatEndPhase] = useState(false)
+const [, setCombatEndPhase] = useState(false)
 
   // Music plays on menu/lore/map screens, and during combat's
   // win/lose screens — but stays silent during active fighting

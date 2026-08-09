@@ -216,6 +216,11 @@ export const CREDITS = {
     text: 'Music by Douglas Gustafson from Pixabay',
     link: 'https://pixabay.com/users/psychronic-13092015/',
   },
+  sound: {
+    label: 'Sound Effects',
+    text: 'Combat sound effects from Pixabay — by DRAGON-STUDIO, floraphonic, Yodguard, and Universfield.',
+    link: 'https://pixabay.com/sound-effects/',
+  },
   art: {
     label: 'Art',
     text: 'All character and environment art is AI-generated, exclusive to this project.',

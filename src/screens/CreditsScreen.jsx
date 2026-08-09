@@ -37,6 +37,14 @@ export default function CreditsScreen({ onBack }) {
               {CREDITS.music.link}
             </a>
           </div>
+
+          <div className="credits-entry">
+            <p className="credits-label">{CREDITS.sound.label}</p>
+            <p className="credits-text">{CREDITS.sound.text}</p>
+            <a href={CREDITS.sound.link} target="_blank" rel="noopener noreferrer" className="credits-link">
+              {CREDITS.sound.link}
+            </a>
+          </div>
         </div>
 
         <button className="credits-back-btn" onClick={() => { playClick(); onBack() }}>
